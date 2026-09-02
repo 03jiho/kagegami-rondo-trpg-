@@ -4,20 +4,20 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Serif+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
   :root{
-    --night:#0d0e1a;
     --night-deep:#07070f;
-    --washi:#e6e1d2;
-    --washi-edge:#cfc6ac;
-    --washi-shadow:#a89878;
+    --washi:#ddd2af;
+    --washi-edge:#b9a978;
+    --washi-shadow:#9c8a5c;
     --ink:#221f2e;
     --ink-soft:#5a5468;
-    --vermillion:#c0392f;
-    --vermillion-bright:#e0584a;
+    --vermillion:#b8321f;
+    --vermillion-bright:#d94f36;
+    --gold-leaf:#a9822f;
+    --gold-bright:#cfa63f;
     --pollution-lo:#4a3b6b;
     --pollution-hi:#8b2d9e;
     --text-hi:#ece7d8;
     --text-lo:#a89bb0;
-    --text-faint:#6b6178;
     --line:#232238;
     --line-soft:#1a1a2c;
     --bond-trust:#7a9c6e;
@@ -122,14 +122,19 @@
   @media (prefers-reduced-motion: reduce){ body[data-tier="3"] .gauge-fill.pollution{animation:none;} }
 
   /* ---------- washi paper stage ---------- */
+  .paper-grain{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    background-repeat:repeat;
+  }
   .stage{
     background:
-      repeating-linear-gradient(90deg, rgba(90,84,104,0.03) 0px, rgba(90,84,104,0.03) 1px, transparent 1px, transparent 3px),
-      radial-gradient(ellipse 480px 260px at 12% 0%, rgba(192,57,47,0.08), transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"),
+      radial-gradient(ellipse 520px 320px at 82% -6%, rgba(207,166,63,0.16), transparent 62%),
+      radial-gradient(ellipse 480px 260px at 8% 4%, rgba(184,50,31,0.09), transparent 60%),
       var(--washi);
     border:1px solid var(--washi-edge);
     border-radius:2px;
-    box-shadow:0 24px 60px -30px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.15);
+    box-shadow:0 24px 60px -30px rgba(0,0,0,.85), 0 0 90px -30px rgba(207,166,63,.3), inset 0 1px 0 rgba(255,255,255,.15);
     min-height:340px;
     display:flex;
     flex-direction:column;
@@ -185,13 +190,30 @@
   .act-btn.encounter:hover{background:#f2e2dc;}
   .act-btn.mend{border-color:var(--bond-doubt); color:#7a5a1f;}
   .act-btn.mend:hover{background:#f2e8d4;}
+  .act-btn.secret{border-color:var(--gold-leaf); border-width:1.5px; color:#6b5320; box-shadow:0 0 0 1px rgba(169,130,47,.25) inset;}
+  .act-btn.secret:hover{background:#f2ecd8;}
+  .act-btn.secret .sub{color:var(--gold-leaf);}
   .act-btn.done{color:var(--ink-soft); border-style:dashed;}
   .act-btn:disabled{opacity:.4; cursor:default;}
 
+  /* ---------- ward seal emblem ---------- */
+  .ward-seal-wrap{display:flex; justify-content:center; margin:4px 0 14px;}
+  .ward-seal-wrap.center-top{margin:0 0 6px;}
+  .ward-seal{filter:drop-shadow(0 4px 10px rgba(0,0,0,.15));}
+  @media (prefers-reduced-motion: no-preference){
+    .ward-seal .seal-crack{transition:stroke-dashoffset 1s ease;}
+  }
+
   /* ---------- intro ---------- */
   .intro{
-    background:var(--washi); border:1px solid var(--washi-edge); border-radius:2px;
-    padding:26px 24px 24px; box-shadow:0 24px 60px -30px rgba(0,0,0,.8); color:var(--ink);
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"),
+      radial-gradient(ellipse 560px 320px at 50% -8%, rgba(207,166,63,0.14), transparent 62%),
+      var(--washi);
+    border:1px solid var(--washi-edge); border-radius:2px;
+    padding:26px 24px 24px;
+    box-shadow:0 24px 60px -30px rgba(0,0,0,.85), 0 0 100px -35px rgba(207,166,63,.32);
+    color:var(--ink);
   }
   .intro .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--vermillion);}
   .intro h1{
@@ -247,10 +269,16 @@
 
   /* ---------- ending ---------- */
   .ending{
-    background:var(--washi); border:1px solid var(--washi-edge); border-radius:2px;
-    padding:26px 24px; box-shadow:0 24px 60px -30px rgba(0,0,0,.8); text-align:center; color:var(--ink);
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"),
+      var(--washi);
+    border:1px solid var(--washi-edge); border-radius:2px;
+    padding:26px 24px; box-shadow:0 24px 60px -30px rgba(0,0,0,.85); text-align:center; color:var(--ink);
   }
-  .ending.dark{border-color:var(--pollution-hi);}
+  .ending.dark{
+    border-color:var(--pollution-hi);
+    box-shadow:0 24px 60px -30px rgba(0,0,0,.85), 0 0 90px -30px rgba(139,45,158,.35);
+  }
   .ending .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-soft);}
   .ending h2{
     font-family:'Nanum Myeongjo',serif; font-weight:800;
@@ -282,9 +310,10 @@
 
 <div id="app">
   <section id="intro-screen" class="intro">
+    <div class="ward-seal-wrap center-top" id="intro-seal-wrap"></div>
     <div class="eyebrow">괴담 · SOLO TRPG</div>
     <h1>카게가미 론도</h1>
-    <p>다이쇼 시대 초입, 도쿄 외곽. 근대화의 신작로가 산기슭까지 뻗어오던 어느 날, 자작 가문 아마미야가에서 일가족 상해 사건이 벌어진다. 현장에는 칼자국과 함께 기괴한 점액, 그리고 오래전 새겨진 결계의 흔적이 남아 있었다.</p>
+    <p>다이쇼 시대의 어느 해, 도쿄 외곽. 근대화의 신작로가 산기슭까지 뻗어오던 어느 날, 자작 가문 아마미야가에서 일가족 상해 사건이 벌어진다. 현장에는 칼자국과 함께 기괴한 점액, 그리고 오래전 새겨진 결계의 흔적이 남아 있었다.</p>
     <p>가문이 대대로 지켜온 봉인이, 공사의 진동으로 금이 가기 시작한 것이다. 봉인 아래 잠든 것은 민담 속 요괴가 아니다 — 별의 저편에서 흘러든, 이름조차 온전히 발음할 수 없는 무언가의 파편이다.</p>
 
     <div class="best-record" id="best-record">최고 기록 — 아직 없음</div>
@@ -328,6 +357,7 @@
         <div class="kicker mono" id="loc-kicker">SCENE 1 / 5</div>
         <h2 id="loc-title">응접실</h2>
       </div>
+      <div class="ward-seal-wrap" id="climax-seal-wrap" hidden></div>
       <div class="log" id="log"></div>
       <div class="actions" id="actions"></div>
     </div>
@@ -538,7 +568,16 @@
     "돌아가지 않아도 될지도 모른다."
   ];
 
-  var BEST_KEY = "kagegami_best";
+  var ENDINGS_KEY = "kagegami_endings";
+  var ENDING_ORDER = ["sealed","destroyed","seized","buried","swallowed"];
+
+  function loadAchievedEndings(){
+    try{
+      var raw = localStorage.getItem(ENDINGS_KEY);
+      var list = raw ? JSON.parse(raw) : [];
+      return Array.isArray(list) ? list : [];
+    }catch(e){ return []; }
+  }
 
   var game = null;
   var stats = {술:0, 지:0, 담:0};
@@ -599,9 +638,10 @@
   }
 
   function renderBestRecord(){
-    var best = null;
-    try{ best = localStorage.getItem(BEST_KEY); }catch(e){}
-    $("best-record").textContent = best ? ("최고 기록 — "+best) : "최고 기록 — 아직 없음";
+    var achieved = loadAchievedEndings();
+    $("best-record").textContent = achieved.length
+      ? ("확인한 결말 — "+achieved.length+" / "+ENDING_ORDER.length)
+      : "확인한 결말 — 아직 없음";
   }
 
   // ---------- dice ----------
@@ -633,6 +673,76 @@
     return "rgb("+r+","+g+","+b+")";
   }
   function corruptionTier(c){ if(c>=9) return 3; if(c>=6) return 2; if(c>=3) return 1; return 0; }
+
+  // ---------- ward seal emblem (SVG, built at runtime) ----------
+  var SVG_NS = "http://www.w3.org/2000/svg";
+  function createWardSeal(size, crackFraction){
+    var svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("viewBox", "0 0 120 120");
+    svg.setAttribute("width", size);
+    svg.setAttribute("height", size);
+    svg.setAttribute("class", "ward-seal");
+    svg.setAttribute("aria-hidden", "true");
+
+    function ring(r, strokeWidth, opacity){
+      var c = document.createElementNS(SVG_NS, "circle");
+      c.setAttribute("cx", 60); c.setAttribute("cy", 60); c.setAttribute("r", r);
+      c.setAttribute("fill", "none");
+      c.setAttribute("stroke", "var(--vermillion)");
+      c.setAttribute("stroke-width", strokeWidth);
+      if(opacity) c.setAttribute("opacity", opacity);
+      svg.appendChild(c);
+    }
+    ring(52, 2);
+    ring(44, 1, 0.55);
+
+    var ticks = document.createElementNS(SVG_NS, "g");
+    ticks.setAttribute("stroke", "var(--vermillion)");
+    ticks.setAttribute("stroke-width", "1.5");
+    ticks.setAttribute("opacity", "0.65");
+    for(var i=0; i<12; i++){
+      var angle = (i*30) * Math.PI/180;
+      var x1 = 60 + 44*Math.sin(angle), y1 = 60 - 44*Math.cos(angle);
+      var x2 = 60 + (i%3===0 ? 51 : 49)*Math.sin(angle), y2 = 60 - (i%3===0 ? 51 : 49)*Math.cos(angle);
+      var line = document.createElementNS(SVG_NS, "line");
+      line.setAttribute("x1", x1.toFixed(1)); line.setAttribute("y1", y1.toFixed(1));
+      line.setAttribute("x2", x2.toFixed(1)); line.setAttribute("y2", y2.toFixed(1));
+      ticks.appendChild(line);
+    }
+    svg.appendChild(ticks);
+
+    var center = document.createElementNS(SVG_NS, "circle");
+    center.setAttribute("cx", 60); center.setAttribute("cy", 60); center.setAttribute("r", 3.5);
+    center.setAttribute("fill", "var(--gold-leaf)");
+    svg.appendChild(center);
+
+    if(crackFraction > 0){
+      var crack = document.createElementNS(SVG_NS, "path");
+      crack.setAttribute("class", "seal-crack");
+      crack.setAttribute("d", "M60 8 L67 24 L51 33 L65 45 L53 56 L60 60");
+      crack.setAttribute("fill", "none");
+      crack.setAttribute("stroke", "var(--pollution-hi)");
+      crack.setAttribute("stroke-width", "2.5");
+      crack.setAttribute("stroke-linecap", "round");
+      crack.setAttribute("stroke-linejoin", "round");
+      svg.appendChild(crack);
+      try{
+        var len = crack.getTotalLength();
+        var offset = len * (1 - Math.min(1, crackFraction));
+        crack.style.strokeDasharray = String(len);
+        crack.style.strokeDashoffset = String(offset);
+      }catch(e){}
+    }
+
+    return svg;
+  }
+
+  function renderWardSeal(containerId, crackFraction){
+    var el = $(containerId);
+    if(!el) return;
+    el.innerHTML = "";
+    el.appendChild(createWardSeal(containerId==="intro-seal-wrap" ? 128 : 108, crackFraction));
+  }
 
   function renderHud(){
     var loc = game.location <= 4 ? LOCATIONS[game.location] : {name:"지하 기단"};
@@ -712,7 +822,7 @@
   function startGame(){
     game = {
       location:1, seal:0, corruption:0, bond:"trust", archetype:selectedArchetype,
-      investigated:{}, bondMended:false, sensedThisLocation:false, digSuccesses:0, ended:false
+      investigated:{}, scholarNoteShown:{}, bondMended:false, sensedThisLocation:false, digSuccesses:0, ended:false
     };
     if(game.archetype==="swordsman") game.corruption = 2;
     if(game.archetype==="kenpei") game.corruption += 1;
@@ -757,16 +867,17 @@
 
     var wrap = $("actions");
     wrap.innerHTML = "";
-    var choices = enc.choices.slice();
+    var choices = enc.choices.map(function(c){ return {choice:c, cls:"encounter"}; });
     if(loc.riskyChoice && game.corruption >= 6 && game.bond !== "severed"){
-      choices.push(loc.riskyChoice);
+      choices.push({choice:loc.riskyChoice, cls:"risky"});
     }
     if(loc.hiddenChoice && stats[loc.hiddenChoice.stat] >= loc.hiddenChoice.min){
-      choices.push(loc.hiddenChoice);
+      choices.push({choice:loc.hiddenChoice, cls:"secret"});
     }
-    choices.forEach(function(choice){
+    choices.forEach(function(entry){
+      var choice = entry.choice;
       var btn = document.createElement("button");
-      btn.className = "act-btn encounter";
+      btn.className = "act-btn " + entry.cls;
       btn.innerHTML = choice.label + (choice.sub ? "<span class='sub'>"+choice.sub+"</span>" : "");
       btn.addEventListener("click", function(){
         choice.resolve();
@@ -821,7 +932,8 @@
     if(!item) return;
     game.investigated[game.location][itemId] = true;
     appendLog("narrative", item.label, item.text);
-    if(game.archetype === "scholar" && SCHOLAR_NOTES[game.location]){
+    if(game.archetype === "scholar" && SCHOLAR_NOTES[game.location] && !game.scholarNoteShown[game.location]){
+      game.scholarNoteShown[game.location] = true;
       appendLog("narrative","미스카토닉의 지식", SCHOLAR_NOTES[game.location]);
     }
     maybeIntrude();
@@ -884,11 +996,15 @@
       return;
     }
 
+    $("climax-seal-wrap").hidden = false;
+
     appendLog("narrative", null, "돌계단을 내려가자, 봉인의 중심이 눈앞에 있다. 균열 사이로 무언가 숨 쉬듯 진동한다. 이제, 선택해야 한다.");
     presentClimaxChoices();
   }
 
   function presentClimaxChoices(){
+    renderWardSeal("climax-seal-wrap", game.seal/10);
+
     var wrap = $("actions");
     wrap.innerHTML = "";
 
@@ -956,7 +1072,7 @@
         : "소신은 완전히 사라진다. 대가는 당신 스스로가 치렀다 — 술식의 마지막 한 조각까지, 자신의 일부를 함께 태워 넣었다. 살아남은 이들은 당신이 예전과 조금 달라졌다고 말한다. 무엇이 달라졌는지는, 아무도 정확히 설명하지 못한다.",
       seized:"제국 육군 특별과의 인원들이 의식 도중 들이닥쳐 파편을 확보해간다. 당신들은 자신이 처음부터 이용당했음을 깨닫지만, 이미 늦었다. 사건은 '산사태 사고'로 짧게 보도되고, 며칠 후 신문 한구석에 '육군성, 신형 연구소 설립'이라는 기사가 조용히 실린다." + (game.archetype==="kenpei" ? " 당신의 옛 상관이 그 명단 맨 위에 있다." : ""),
       buried:"어느 쪽도 완전히 끝맺지 못한 채, 당신들은 손을 뗀다. 신문에는 '아마미야가 일가족 동반 자살'이라 짧게 실리고, 세상은 신경 쓰지 않는다. 신작로는 예정대로 완공되고, 전등이 하나둘 켜진다. 진실을 아는 자들만 남아, 서로 다른 곳을 바라보며 흩어진다.",
-      swallowed:"부적도, 진언도, 이제는 소용이 없다. 저택 전체가 무언가 다른 것의 일부가 되어가는 감각 속에서, 이야기는 몇 달을 건너뛴다. 1923년 9월, 도쿄. 그날 벌어진 재난이 정말 땅 밑의 흔들림뿐이었는지, 이 사건을 아는 이들은 다시는 확신하지 못했다."
+      swallowed:"부적도, 진언도, 이제는 소용이 없다. 저택 전체가 무언가 다른 것의 일부가 되어가는 감각 속에서, 이야기는 시간을 건너뛴다. 1923년 9월, 도쿄. 그날 벌어진 재난이 정말 땅 밑의 흔들림뿐이었는지, 이 사건을 아는 이들은 다시는 확신하지 못했다."
     };
 
     $("game-screen").hidden = true;
@@ -970,11 +1086,14 @@
 
     var note = "";
     try{
-      var record = titles[key];
-      var best = localStorage.getItem(BEST_KEY);
-      if(key === "sealed" || key === "destroyed"){
-        localStorage.setItem(BEST_KEY, record);
-        note = best ? "" : "첫 완주 기록입니다.";
+      var achieved = loadAchievedEndings();
+      var isNew = achieved.indexOf(key) === -1;
+      if(isNew){
+        achieved.push(key);
+        localStorage.setItem(ENDINGS_KEY, JSON.stringify(achieved));
+        note = achieved.length >= ENDING_ORDER.length
+          ? "다섯 결말을 모두 확인했습니다."
+          : "새로운 결말을 확인했습니다. ("+achieved.length+" / "+ENDING_ORDER.length+")";
       }
     }catch(e){}
     $("ending-record-note").textContent = note;
@@ -985,6 +1104,7 @@
     renderArchetypes();
     renderStatRows();
     renderBestRecord();
+    renderWardSeal("intro-seal-wrap", 0);
     $("start-btn").addEventListener("click", startGame);
     $("retry-btn").addEventListener("click", function(){ location.reload(); });
   });
