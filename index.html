@@ -1,0 +1,992 @@
+<meta charset="utf-8">
+<title>카게가미 론도</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Serif+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --night:#0d0e1a;
+    --night-deep:#07070f;
+    --washi:#e6e1d2;
+    --washi-edge:#cfc6ac;
+    --washi-shadow:#a89878;
+    --ink:#221f2e;
+    --ink-soft:#5a5468;
+    --vermillion:#c0392f;
+    --vermillion-bright:#e0584a;
+    --pollution-lo:#4a3b6b;
+    --pollution-hi:#8b2d9e;
+    --text-hi:#ece7d8;
+    --text-lo:#a89bb0;
+    --text-faint:#6b6178;
+    --line:#232238;
+    --line-soft:#1a1a2c;
+    --bond-trust:#7a9c6e;
+    --bond-doubt:#c8933f;
+    --bond-severed:#6b6152;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 700px 460px at 50% -10%, rgba(192,57,47,0.10), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 50% 115%, rgba(0,0,0,0.5), transparent 60%),
+      var(--night-deep);
+    color:var(--text-hi);
+    font-family:'Noto Serif KR', serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    filter:saturate(1) brightness(1) contrast(1);
+    transition:filter 1s ease;
+  }
+
+  body[data-tier="1"]{ filter:saturate(.88) brightness(.96) contrast(1.02); }
+  body[data-tier="2"]{ filter:saturate(.68) brightness(.9) contrast(1.06); }
+  body[data-tier="3"]{ filter:saturate(.44) brightness(.82) contrast(1.14); }
+
+  .pollution-veil{
+    position:fixed; inset:0; pointer-events:none; z-index:6;
+    background:radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(139,45,158,.38) 100%);
+    opacity:0; transition:opacity 1.1s ease;
+  }
+  body[data-tier="1"] .pollution-veil{opacity:.12;}
+  body[data-tier="2"] .pollution-veil{opacity:.3;}
+  body[data-tier="3"] .pollution-veil{opacity:.55;}
+
+  ::selection{background:var(--vermillion); color:#fff;}
+
+  button{font-family:inherit; cursor:pointer;}
+  button:focus-visible, [tabindex]:focus-visible{
+    outline:2px solid var(--vermillion-bright);
+    outline-offset:2px;
+  }
+
+  .mono{font-family:'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric:tabular-nums;}
+  .display{font-family:'Nanum Myeongjo', serif; font-weight:800;}
+
+  #app{
+    max-width:640px;
+    margin:0 auto;
+    padding:20px 18px 60px;
+  }
+
+  /* ---------- HUD ---------- */
+  .hud{
+    position:sticky; top:0; z-index:20;
+    background:linear-gradient(180deg, var(--night-deep) 80%, transparent);
+    padding:14px 0 12px;
+    margin-bottom:6px;
+  }
+  .hud-title{
+    display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+    margin-bottom:10px;
+  }
+  .hud-title h1{
+    font-family:'Nanum Myeongjo',serif; font-weight:800;
+    font-size:clamp(22px,5vw,30px);
+    letter-spacing:0.03em;
+    margin:0;
+    color:var(--vermillion-bright);
+    text-shadow:0 0 18px rgba(192,57,47,0.3);
+    text-wrap:balance;
+  }
+  .hud-loc{
+    font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-lo);
+    text-align:right;
+  }
+  .hud-loc b{color:var(--vermillion); font-weight:600;}
+
+  .hud-stats{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+  .hud-chip{
+    display:flex; align-items:center; gap:6px;
+    background:var(--line-soft);
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:6px 9px;
+    font-size:11.5px;
+    color:var(--text-lo);
+  }
+  .bond-dot{width:8px; height:8px; border-radius:50%; flex:none;}
+  .bond-dot.trust{background:var(--bond-trust); box-shadow:0 0 6px var(--bond-trust);}
+  .bond-dot.doubt{background:var(--bond-doubt); box-shadow:0 0 6px var(--bond-doubt);}
+  .bond-dot.severed{background:var(--bond-severed);}
+
+  .gauge-wrap{flex:1 1 130px; min-width:120px; display:flex; align-items:center; gap:6px;}
+  .gauge-label{font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-lo); flex:none;}
+  .gauge-track{flex:1; height:7px; background:var(--line-soft); border:1px solid var(--line); border-radius:1px; overflow:hidden;}
+  .gauge-fill{height:100%; width:0%; transition:width .4s ease, background-color .4s ease;}
+  .gauge-num{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--text-lo); flex:none;}
+
+  body[data-tier="3"] .gauge-fill.pollution{animation:gaugePulse 1.5s ease-in-out infinite;}
+  @keyframes gaugePulse{ 0%,100%{opacity:1;} 50%{opacity:.55;} }
+  @media (prefers-reduced-motion: reduce){ body[data-tier="3"] .gauge-fill.pollution{animation:none;} }
+
+  /* ---------- washi paper stage ---------- */
+  .stage{
+    background:
+      repeating-linear-gradient(90deg, rgba(90,84,104,0.03) 0px, rgba(90,84,104,0.03) 1px, transparent 1px, transparent 3px),
+      radial-gradient(ellipse 480px 260px at 12% 0%, rgba(192,57,47,0.08), transparent 60%),
+      var(--washi);
+    border:1px solid var(--washi-edge);
+    border-radius:2px;
+    box-shadow:0 24px 60px -30px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.15);
+    min-height:340px;
+    display:flex;
+    flex-direction:column;
+    margin-top:10px;
+  }
+  .loc-head{padding:18px 22px 12px; border-bottom:1px dashed var(--washi-shadow);}
+  .loc-head .kicker{
+    font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+    font-family:'IBM Plex Mono',monospace; color:var(--ink-soft);
+  }
+  .loc-head h2{
+    font-family:'Nanum Myeongjo',serif; font-weight:700;
+    font-size:21px; margin:5px 0 0; color:var(--ink);
+  }
+
+  .log{flex:1; padding:16px 22px; overflow-y:auto; max-height:46vh; color:var(--ink);}
+  .log::-webkit-scrollbar{width:8px;}
+  .log::-webkit-scrollbar-thumb{background:var(--washi-shadow); border-radius:4px;}
+
+  .entry{margin-bottom:15px; line-height:1.8; font-size:15.5px;}
+  .entry .head{
+    font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+    font-family:'IBM Plex Mono',monospace; color:var(--ink-soft);
+    margin-bottom:4px;
+  }
+  .entry.narrative{color:var(--ink);}
+  .entry.hint{color:var(--vermillion); border-left:2px solid var(--vermillion); padding-left:12px;}
+  .entry.hint .head{color:var(--vermillion);}
+  .entry.roll{color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; font-size:12.5px; border-left:2px solid var(--washi-shadow); padding-left:12px;}
+  .entry.omen{color:#7a3d63; font-style:italic; opacity:.9;}
+  .entry.omen .head{color:var(--pollution-hi);}
+  .entry.intrude{color:#7a3d63; font-style:italic; border-left:2px dashed var(--pollution-hi); padding-left:12px;}
+  body[data-tier="3"] .entry.intrude{animation:jitter .16s ease-in-out 2;}
+  @keyframes jitter{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-2px);} 75%{transform:translateX(2px);} }
+  @media (prefers-reduced-motion: reduce){ body[data-tier="3"] .entry.intrude{animation:none;} }
+  .entry.system{color:var(--ink-soft); font-size:13px; font-style:italic;}
+  .entry.bond{color:#8a6a2f; border-left:2px solid var(--bond-doubt); padding-left:12px;}
+
+  .actions{padding:14px 22px 20px; border-top:1px dashed var(--washi-shadow); display:flex; flex-direction:column; gap:8px;}
+  .act-btn{
+    background:#f4efe1; border:1px solid var(--washi-shadow); color:var(--ink);
+    padding:12px 14px; font-size:14.5px; text-align:left; border-radius:2px;
+    transition:border-color .15s, background .15s; font-family:'Noto Serif KR',serif;
+  }
+  .act-btn .sub{display:block; font-size:11.5px; color:var(--ink-soft); margin-top:3px; font-family:'IBM Plex Mono',monospace;}
+  .act-btn:hover{border-color:var(--vermillion); background:#efe6d4;}
+  .act-btn.dig{border-color:var(--washi-shadow);}
+  .act-btn.retreat{border-color:var(--bond-trust); color:#3f5a38;}
+  .act-btn.retreat:hover{background:#e7ecdf;}
+  .act-btn.risky{border-color:var(--pollution-hi); color:#6b2d78;}
+  .act-btn.risky:hover{background:#efe2f2;}
+  .act-btn.encounter{border-color:var(--vermillion);}
+  .act-btn.encounter:hover{background:#f2e2dc;}
+  .act-btn.mend{border-color:var(--bond-doubt); color:#7a5a1f;}
+  .act-btn.mend:hover{background:#f2e8d4;}
+  .act-btn.done{color:var(--ink-soft); border-style:dashed;}
+  .act-btn:disabled{opacity:.4; cursor:default;}
+
+  /* ---------- intro ---------- */
+  .intro{
+    background:var(--washi); border:1px solid var(--washi-edge); border-radius:2px;
+    padding:26px 24px 24px; box-shadow:0 24px 60px -30px rgba(0,0,0,.8); color:var(--ink);
+  }
+  .intro .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--vermillion);}
+  .intro h1{
+    font-family:'Nanum Myeongjo',serif; font-weight:800;
+    font-size:clamp(30px,7vw,42px); margin:8px 0 16px; color:var(--ink); text-wrap:balance;
+  }
+  .intro p{line-height:1.9; font-size:15.5px; margin:0 0 14px; color:var(--ink);}
+  .best-record{
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink-soft);
+    border-top:1px dashed var(--washi-shadow); border-bottom:1px dashed var(--washi-shadow);
+    padding:10px 0; margin:18px 0;
+  }
+  .best-record b{color:var(--vermillion);}
+
+  .block-title{
+    font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft);
+    display:flex; justify-content:space-between; margin-bottom:10px;
+  }
+  .block-title .pool{color:var(--vermillion); font-family:'IBM Plex Mono',monospace;}
+  .block{margin:18px 0;}
+
+  .arch-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .arch-card{
+    background:#f4efe1; border:1px solid var(--washi-shadow); border-radius:2px;
+    padding:10px; text-align:left; color:var(--ink);
+  }
+  .arch-card .nm{font-size:14px; font-weight:700; display:block; margin-bottom:3px;}
+  .arch-card .ds{font-size:11.5px; color:var(--ink-soft); line-height:1.5;}
+  .arch-card:hover{border-color:var(--vermillion);}
+  .arch-card[aria-pressed="true"]{border-color:var(--vermillion); background:#f2e2dc; box-shadow:0 0 0 1px var(--vermillion) inset;}
+  .arch-card[aria-pressed="true"] .nm{color:var(--vermillion);}
+
+  .stat-row{display:flex; align-items:center; gap:12px; padding:8px 0;}
+  .stat-row .nm{width:56px; font-size:14.5px; color:var(--ink); flex:none;}
+  .stat-row .desc{flex:1; font-size:12px; color:var(--ink-soft);}
+  .stepper{display:flex; align-items:center; gap:8px; flex:none;}
+  .stepper button{
+    width:26px; height:26px; background:#f4efe1; border:1px solid var(--washi-shadow); color:var(--ink);
+    border-radius:2px; font-size:15px; line-height:1;
+  }
+  .stepper button:hover{border-color:var(--vermillion);}
+  .stepper button:disabled{opacity:.35; cursor:default;}
+  .stepper .n{width:18px; text-align:center; font-family:'IBM Plex Mono',monospace; color:var(--vermillion);}
+
+  .btn-primary{
+    background:linear-gradient(180deg, var(--vermillion-bright), var(--vermillion));
+    border:1px solid #7a2318; color:#fff3ee;
+    padding:13px 22px; font-weight:700; border-radius:2px; font-size:15px;
+    font-family:'Nanum Myeongjo',serif; letter-spacing:.02em; width:100%;
+  }
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-primary:disabled{opacity:.4; cursor:default;}
+
+  /* ---------- ending ---------- */
+  .ending{
+    background:var(--washi); border:1px solid var(--washi-edge); border-radius:2px;
+    padding:26px 24px; box-shadow:0 24px 60px -30px rgba(0,0,0,.8); text-align:center; color:var(--ink);
+  }
+  .ending.dark{border-color:var(--pollution-hi);}
+  .ending .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-soft);}
+  .ending h2{
+    font-family:'Nanum Myeongjo',serif; font-weight:800;
+    font-size:clamp(26px,7vw,36px); margin:8px 0 18px; color:var(--vermillion);
+  }
+  .ending.dark h2{color:var(--pollution-hi);}
+  .ending p{line-height:1.9; font-size:15.5px; color:var(--ink); text-align:left; margin:0 0 14px;}
+  .ending-stats{
+    display:flex; justify-content:center; gap:22px; font-family:'IBM Plex Mono',monospace;
+    font-size:13px; color:var(--ink-soft); margin:18px 0; flex-wrap:wrap;
+  }
+  .ending-stats b{color:var(--vermillion); display:block; font-size:17px;}
+
+  .lamp-glow{
+    position:fixed; top:-6%; left:50%; transform:translateX(-50%);
+    width:520px; height:340px;
+    background:radial-gradient(ellipse, rgba(192,57,47,.12), transparent 68%);
+    pointer-events:none; z-index:0;
+    animation:flicker 6s ease-in-out infinite;
+  }
+  @keyframes flicker{ 0%,100%{opacity:1;} 38%{opacity:.72;} 44%{opacity:1;} 70%{opacity:.85;} }
+  @media (prefers-reduced-motion: reduce){ .lamp-glow{animation:none;} }
+
+  [hidden]{display:none !important;}
+</style>
+
+<div class="lamp-glow" aria-hidden="true"></div>
+<div class="pollution-veil" aria-hidden="true"></div>
+
+<div id="app">
+  <section id="intro-screen" class="intro">
+    <div class="eyebrow">괴담 · SOLO TRPG</div>
+    <h1>카게가미 론도</h1>
+    <p>다이쇼 시대 초입, 도쿄 외곽. 근대화의 신작로가 산기슭까지 뻗어오던 어느 날, 자작 가문 아마미야가에서 일가족 상해 사건이 벌어진다. 현장에는 칼자국과 함께 기괴한 점액, 그리고 오래전 새겨진 결계의 흔적이 남아 있었다.</p>
+    <p>가문이 대대로 지켜온 봉인이, 공사의 진동으로 금이 가기 시작한 것이다. 봉인 아래 잠든 것은 민담 속 요괴가 아니다 — 별의 저편에서 흘러든, 이름조차 온전히 발음할 수 없는 무언가의 파편이다.</p>
+
+    <div class="best-record" id="best-record">최고 기록 — 아직 없음</div>
+
+    <div class="block">
+      <div class="block-title">신원 <span class="pool">하나 선택</span></div>
+      <div class="arch-grid" id="arch-grid"></div>
+    </div>
+
+    <div class="block">
+      <div class="block-title">능력치 배분 <span class="pool">남은 점수 <span id="pool-left">6</span></span></div>
+      <div id="stat-rows"></div>
+    </div>
+
+    <button class="btn-primary" id="start-btn" disabled>저택으로 향한다</button>
+  </section>
+
+  <div id="game-screen" hidden>
+    <div class="hud">
+      <div class="hud-title">
+        <h1>카게가미 론도</h1>
+        <div class="hud-loc">현재 위치<br><b id="hud-loc-name">응접실</b></div>
+      </div>
+      <div class="hud-stats">
+        <div class="hud-chip"><span class="bond-dot trust" id="bond-dot"></span><span id="bond-label">유키에: 신뢰</span></div>
+        <div class="gauge-wrap">
+          <span class="gauge-label">균열</span>
+          <div class="gauge-track"><div class="gauge-fill" id="seal-fill"></div></div>
+          <span class="gauge-num" id="seal-num">0/10</span>
+        </div>
+        <div class="gauge-wrap">
+          <span class="gauge-label">침식</span>
+          <div class="gauge-track"><div class="gauge-fill pollution" id="corruption-fill"></div></div>
+          <span class="gauge-num" id="corruption-num">0/10</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="loc-head">
+        <div class="kicker mono" id="loc-kicker">SCENE 1 / 5</div>
+        <h2 id="loc-title">응접실</h2>
+      </div>
+      <div class="log" id="log"></div>
+      <div class="actions" id="actions"></div>
+    </div>
+  </div>
+
+  <section id="ending-screen" class="ending" hidden>
+    <div class="eyebrow" id="ending-eyebrow">ENDING</div>
+    <h2 id="ending-title"></h2>
+    <div id="ending-body"></div>
+    <div class="ending-stats">
+      <div>봉인 균열<b id="ending-seal" class="mono"></b></div>
+      <div>최종 침식<b id="ending-corruption" class="mono"></b></div>
+    </div>
+    <p class="mono" id="ending-record-note" style="font-size:12.5px; color:var(--ink-soft);"></p>
+    <button class="btn-primary" id="retry-btn">다시 저택으로</button>
+  </section>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STATS = ["술","지","담"];
+  var STAT_DESC = {술:"주술과 기예로 어둠에 파고드는 힘", 지:"지식과 직감 — 스스로의 안전을 지킨다", 담:"흔들리지 않는 배짱 — 유키에와의 인연을 지킨다"};
+  var POOL_TOTAL = 6;
+  var STAT_MAX = 4;
+
+  var ARCHETYPES = [
+    { id:"onmyoji", name:"퇴마 음양사", desc:"파고들다 실패해도 침식을 덜 입는다",
+      flavor:"당신은 어릴 적부터 부적과 진언을 배웠다. 눈에 보이지 않는 것들과 거래하는 법을 안다." },
+    { id:"swordsman", name:"마인 검객", desc:"파고들 때 유리하지만, 이미 침식된 채 시작한다",
+      flavor:"당신의 몸에는 오래전 섞인 무언가의 피가 흐른다. 그것이 때때로 당신 대신 손을 움직인다." },
+    { id:"scholar", name:"근대 학자", desc:"조사할 때마다 남들이 못 보는 것을 하나 더 본다",
+      flavor:"미스카토닉에서 배운 것들은, 이 나라의 누구에게도 설명할 수 없는 것들이었다." },
+    { id:"miko", name:"무녀", desc:"흔들린 인연을 회복시키는 데 능하다",
+      flavor:"할머니의 목소리가 아직도 당신 안에 남아 있다. 가끔은, 그녀가 대신 말하는 것 같기도 하다." },
+    { id:"kenpei", name:"헌병 조사관", desc:"위험을 미리 보고받아 항상 예감이 들어맞는다",
+      flavor:"당신은 명령을 받고 이곳에 왔다. 하지만 명령서에 적히지 않은 것들이 너무 많다." }
+  ];
+  var selectedArchetype = null;
+
+  var SCHOLAR_NOTES = {
+    1:"그을림 자국은 화기가 아니라 저온에서 생긴다 — 미스카토닉의 문헌에서 본 적 있는 흔적이다.",
+    2:"찢겨나간 족보 페이지, 그 위치로 미루어 짐작건대 감춰진 이름은 하나뿐이다.",
+    3:"인형 목에 감긴 실의 매듭은 서양 항해술의 매듭과 같다 — 이 집 사람의 것이 아니다.",
+    4:"나무의 결에 새겨진 문자, 그 절반은 인류의 언어 체계에 속하지 않는다."
+  };
+
+  var LOCATIONS = [
+    null,
+    { name:"응접실", kicker:"SCENE 1 · 사건 현장", dc:14,
+      hints:["등불 그림자가 사람 것보다 하나 더 많다.","다다미 위, 물기가 마른 자국이 사람 발보다 훨씬 크다."],
+      investigate:[
+        {id:"lantern", label:"쓰러진 등롱을 살핀다", text:"등롱이 안에서부터 그을려 있다. 불이 아니라, 무언가가 스치고 지나간 자국 같다."},
+        {id:"trace", label:"바닥의 흔적을 살핀다", text:"다다미 위에 젖은 발자국. 사람 것치고는 발가락 사이가 이상하게 길다."}
+      ],
+      digOk:["부적을 태우자 벽에 스민 잔향이 걷히며, 그날 밤의 잔상이 흐릿하게 떠오른다.","손끝으로 결계의 흔적을 더듬자, 무언가 반응하듯 흙바닥이 미세하게 떨린다."],
+      digFail:["부적이 손안에서 재가 되어 흩어진다. 아무것도 남지 않았다.","결계를 억지로 건드리자 반동이 손을 타고 올라온다."],
+      encounter:{
+        intro:["안채에서 살아남은 하인 하나가 구석에서 떨고 있다.","하인이 당신들을 보자마자 앞뒤 안 맞는 말을 쏟아낸다."],
+        choices:[
+          { label:"차분히 다독이며 듣는다", sub:"담 판정 DC 12", resolve:function(){
+            var dc=12, r=roll("담");
+            appendLog("roll", null, "담 판정 — d20("+r.d+") + "+stats.담+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
+            if(r.total>=dc){ appendLog("narrative","하인의 증언","떨리는 목소리 사이로, 그날 밤 서재 쪽에서 들려온 이상한 소리에 대한 명확한 증언을 얻는다."); }
+            else{ appendLog("narrative","하인의 증언","하인이 결국 겁에 질려 자리를 피한다."); }
+          }},
+          { label:"핵심만 캐묻는다", sub:"안전", resolve:function(){
+            appendLog("narrative","하인의 증언","다그쳐 묻자 짧은 대답만 돌아온다. 소득은 있지만 크지 않다.");
+          }},
+          { label:"부적으로 진정시킨다", sub:"술 판정 DC 13", resolve:function(){
+            var dc=13, r=roll("술");
+            appendLog("roll", null, "술 판정 — d20("+r.d+") + "+stats.술+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
+            if(r.total>=dc){
+              appendLog("narrative","하인의 증언","부적의 기운이 스미자, 하인 자신도 몰랐던 억눌린 기억까지 끌려나온다.");
+              addSeal(-1);
+            } else {
+              appendLog("narrative","하인의 증언","기운이 잘못 뒤틀리며, 하인이 그대로 혼절한다.");
+              addCorruption(1);
+            }
+          }}
+        ]
+      },
+      hiddenChoice:{ stat:"담", min:4, label:"하인의 두려움을 완전히 잠재운다", sub:"담 4 이상 · 판정 없이 성공", resolve:function(){
+        addSeal(-1);
+        appendLog("narrative","하인의 증언","단 몇 마디로 하인의 떨림이 멎는다. 그가 아는 모든 것을 털어놓는다.");
+      }}
+    },
+    { name:"서재", kicker:"SCENE 2 · 가문의 기록", dc:16,
+      hints:["오래된 종이 냄새 사이로, 다른 무언가의 냄새가 섞여 있다.","책장 그림자가 등불 방향과 맞지 않는다."],
+      investigate:[
+        {id:"genealogy", label:"가문 족보를 살핀다", text:"대대로 '지키는 자'라는 직함이 내려온 기록이다. 마지막 장은 누군가 찢어낸 듯 사라져 있다."},
+        {id:"scripture", label:"고문서를 살핀다", text:"에도 시대 음양료가 남긴 진언서. 절반은 낯선 문자로 덧씌워져 있다 — 사람의 글씨가 아니다."}
+      ],
+      digOk:["부적을 태우자 서가 사이로 그날의 잔향이 스며나온다. 봉인의 원형이 어렴풋이 보인다.","손끝으로 결계의 흔적을 더듬자, 서고 전체가 나직이 웅웅거린다."],
+      digFail:["부적이 손안에서 재가 되어 흩어진다. 아무것도 얻지 못했다.","결계를 억지로 건드리자, 반동이 팔을 타고 올라온다."],
+      encounter:{
+        intro:["책상 아래, 부적으로 겹겹이 봉해진 서랍이 있다.","자물쇠 대신 낡은 진언이 서랍을 감싸고 있다."],
+        choices:[
+          { label:"부적으로 봉인을 풀어낸다", sub:"술 판정 DC 13", resolve:function(){
+            var dc=13, r=roll("술");
+            appendLog("roll", null, "술 판정 — d20("+r.d+") + "+stats.술+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
+            if(r.total>=dc){ appendLog("narrative","봉인된 서랍","봉인 진언의 원본을 손에 넣는다. 이 결계가 처음 세워진 방식이 고스란히 담겨 있다."); addSeal(-1); }
+            else{ appendLog("narrative","봉인된 서랍","진언이 손안에서 뒤틀리며 무언가 스며든다."); addCorruption(1); }
+          }},
+          { label:"자물쇠 구조를 분석해 연다", sub:"지 판정 DC 12", resolve:function(){
+            var dc=12, r=roll("지");
+            appendLog("roll", null, "지 판정 — d20("+r.d+") + "+stats.지+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
+            if(r.total>=dc){ appendLog("narrative","봉인된 서랍","기계 장치를 정확히 짚어내 안전하게 서랍을 연다."); }
+            else{ appendLog("narrative","봉인된 서랍","시간만 허비했다. 서랍은 여전히 굳게 닫혀 있다."); addSeal(1); }
+          }},
+          { label:"그냥 힘으로 부순다", sub:"안전 · 가문의 신뢰를 해친다", resolve:function(){
+            appendLog("narrative","봉인된 서랍","서랍을 부수자 안의 것이 흩어진다. 지켜보던 하인들의 눈초리가 싸늘하다.");
+          }}
+        ]
+      },
+      hiddenChoice:{ stat:"술", min:4, label:"결계째로 서랍을 태워 없앤다", sub:"술 4 이상 · 판정 없이 성공", resolve:function(){
+        addSeal(-1);
+        appendLog("narrative","봉인된 서랍","진언 한 줄이면 충분하다. 서랍 전체가 재가 되며 속의 것이 온전히 드러난다.");
+      }}
+    },
+    { name:"별채", kicker:"SCENE 3 · 유일한 목격자", dc:18,
+      hints:["복도 끝, 인기척이 없는데 다다미가 삐걱인다.","유키에의 방문 틈으로 희미한 빛이 새어나온다 — 등불 색이 아니다."],
+      investigate:[
+        {id:"wrist", label:"유키에의 상태를 살핀다", text:"손목에 비늘 같은 것이 미세하게 돋아 있다. 본인은 알아채지 못한 눈치다."},
+        {id:"doll", label:"방 안의 소지품을 살핀다", text:"낡은 인형 하나, 목에 실이 몇 겹으로 감겨 있다. 누가, 왜 인형의 목을 묶었을까."}
+      ],
+      digOk:["부적을 그녀의 손에 쥐여주자, 억눌렸던 기억의 파편이 스쳐 지나간다.","진언을 낮게 읊자, 그녀의 눈동자 너머로 낯선 풍경이 잠깐 비친다."],
+      digFail:["기억을 억지로 끌어내려 하자 그녀가 비명을 지르며 발작한다.","무언가 저항하듯, 그녀의 눈이 순간 다른 색으로 물든다."],
+      encounter:{
+        intro:["유키에가 떨리는 목소리로 그날 밤을 이야기하기 시작한다.","그녀의 이야기는 자꾸 앞뒤가 어긋난다 — 마치 두 개의 기억이 겹쳐 있는 것처럼."],
+        choices:[
+          { label:"두려움에 공감하며 듣는다", sub:"담 판정 DC 13", resolve:function(){
+            var dc=13, r=roll("담");
+            appendLog("roll", null, "담 판정 — d20("+r.d+") + "+stats.담+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
+            if(r.total>=dc){
+              appendLog("narrative","유키에의 증언","그녀가 마침내 진짜 기억 한 조각을 꺼내놓는다. 눈물과 함께.");
+              if(game.bond==="trust"){ appendLog("bond","유키에","그녀가 처음으로 당신의 손을 마주 잡는다."); }
+            } else {
+              appendLog("narrative","유키에의 증언","그녀가 결국 울며 입을 닫는다.");
+            }
+          }},
+          { label:"모순을 논리적으로 짚어낸다", sub:"지 판정 DC 12", resolve:function(){
+            var dc=12, r=roll("지");
+            appendLog("roll", null, "지 판정 — d20("+r.d+") + "+stats.지+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
+            if(r.total>=dc){ appendLog("narrative","유키에의 증언","모순을 짚어내자, 그녀가 이미 그것과 접촉한 적이 있다는 사실이 드러난다."); }
+            else{ appendLog("narrative","유키에의 증언","추궁하듯 몰아붙이자 그녀가 방어적으로 변한다."); worsenBond(); }
+          }},
+          { label:"조용히 지켜만 본다", sub:"안전", resolve:function(){
+            appendLog("narrative","유키에의 증언","말을 아끼고 그저 곁을 지킨다. 큰 소득은 없다.");
+          }}
+        ]
+      },
+      hiddenChoice:{ stat:"지", min:4, label:"증상을 정확히 진단한다", sub:"지 4 이상 · 판정 없이 성공", resolve:function(){
+        appendLog("narrative","유키에의 증언","그녀의 증상을 한눈에 짚어낸다 — 카미가카리가 이미 상당히 진행되어 있다.");
+      }}
+    },
+    { name:"정원", kicker:"SCENE 4 · 무너진 사당", dc:20,
+      hints:["무너진 사당 앞, 흙이 사람 걸음이 아닌 자국으로 패어 있다.","나무들 사이로, 있어서는 안 될 그림자 하나가 서 있다."],
+      investigate:[
+        {id:"shrine", label:"무너진 사당을 살핀다", text:"신령이 깃들었던 신체가 있어야 할 자리가 텅 비어 있다. 오래전 누군가 치운 듯한 흔적."},
+        {id:"trees", label:"정원의 나무들을 살핀다", text:"나이테 사이로, 문자처럼 보이는 결이 새겨져 있다. 사람의 글씨는 아니다."}
+      ],
+      digOk:["결계의 잔재를 더듬자, 사당이 지키던 것의 형체가 어렴풋이 떠오른다.","진언을 읊는 순간, 정원 전체의 공기가 한 박자 멈춘다."],
+      digFail:["결계를 잘못 건드리자, 무언가 반응하며 다가오는 기척이 느껴진다.","진언이 도중에 끊기며, 서늘한 감각이 목덜미를 스친다."],
+      encounter:{
+        intro:["앞이 벽처럼 가로막힌다 — 아무것도 없는데, 나아갈 수가 없다.","어둠 속에서 커다란 눈 하나가 천천히 이쪽을 향한다."],
+        choices:[
+          { label:"부적과 오행으로 밀어낸다", sub:"술 판정 DC 15", resolve:function(){
+            var dc=15, r=roll("술");
+            appendLog("roll", null, "술 판정 — d20("+r.d+") + "+stats.술+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
+            if(r.total>=dc){ appendLog("narrative","누리카베노메","벽이 갈라지듯 물러난다. 그것이 지키던 비밀 하나가 고스란히 드러난다."); addSeal(-1); }
+            else{ appendLog("narrative","누리카베노메","눈이 당신을 정면으로 응시한다. 무언가가 정신을 스치고 지나간다."); addCorruption(2); }
+          }},
+          { label:"움직이지 않고 버틴다", sub:"담 판정 DC 14", resolve:function(){
+            var dc=14, r=roll("담");
+            appendLog("roll", null, "담 판정 — d20("+r.d+") + "+stats.담+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
+            if(r.total>=dc){ appendLog("narrative","누리카베노메","숨소리 하나 흔들리지 않는다. 그것이 흥미를 잃고 서서히 물러난다."); }
+            else{ appendLog("narrative","누리카베노메","다리가 떨린다. 그것이 몸을 돌려 다른 곳으로 미끄러지듯 사라진다 — 어딘가 다른 균열을 향해."); addSeal(1); }
+          }}
+        ]
+      },
+      riskyChoice:{ label:"유키에를 앞세워 시선을 돌린다", sub:"위험한 선택 · 판정 없이 성공", resolve:function(){
+        appendLog("narrative","누리카베노메","그녀를 앞으로 내밀자, 그것의 시선이 그녀에게 옮겨간다. 그 틈에 벽이 걷힌다.");
+        worsenBond();
+        addCorruption(2);
+      }},
+      hiddenChoice:{ stat:"담", min:4, label:"눈 하나 깜빡이지 않고 마주 본다", sub:"담 4 이상 · 판정 없이 성공", resolve:function(){
+        addSeal(-1);
+        appendLog("narrative","누리카베노메","시선을 피하지 않는다. 오히려 그것이 먼저 흔들리며 물러난다.");
+      }}
+    }
+  ];
+
+  var OMEN_LINES = [
+    "저 멀리서 방울 소리가 울린다. 이 저택엔 방울이 없다.",
+    "벽 틈으로 희미한 인영이 스쳐 지나간다.",
+    "유키에가 갑자기 허공을 향해 고개를 숙인다.",
+    "등불이 일제히 파랗게 흔들린다.",
+    "다다미 밑에서 낮은 숨소리가 느껴진다."
+  ];
+
+  var INTRUDE_LINES = [
+    "그 힘을 받아들이면, 두렵지 않을 텐데.",
+    "이 집 사람들이 다 뭐가 중요해.",
+    "조금 더 들여다봐도 괜찮아. 아직은.",
+    "네 안의 것이, 이미 다 알고 있다.",
+    "돌아가지 않아도 될지도 모른다."
+  ];
+
+  var BEST_KEY = "kagegami_best";
+
+  var game = null;
+  var stats = {술:0, 지:0, 담:0};
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  // ---------- intro / archetype + stat allocation ----------
+  function poolUsed(){ return STATS.reduce(function(s,k){ return s+stats[k]; }, 0); }
+
+  function updateStartButton(){
+    $("start-btn").disabled = (poolUsed() !== POOL_TOTAL) || !selectedArchetype;
+  }
+
+  function renderArchetypes(){
+    var wrap = $("arch-grid");
+    wrap.innerHTML = "";
+    ARCHETYPES.forEach(function(a){
+      var card = document.createElement("button");
+      card.className = "arch-card";
+      card.type = "button";
+      card.setAttribute("aria-pressed", selectedArchetype===a.id ? "true" : "false");
+      card.innerHTML = "<span class='nm'>"+a.name+"</span><span class='ds'>"+a.desc+"</span>";
+      card.addEventListener("click", function(){ selectedArchetype = a.id; renderArchetypes(); updateStartButton(); });
+      wrap.appendChild(card);
+    });
+  }
+
+  function renderStatRows(){
+    var wrap = $("stat-rows");
+    wrap.innerHTML = "";
+    STATS.forEach(function(k){
+      var row = document.createElement("div");
+      row.className = "stat-row";
+      row.innerHTML =
+        '<span class="nm">'+k+'</span>' +
+        '<span class="desc">'+STAT_DESC[k]+'</span>' +
+        '<span class="stepper">' +
+          '<button type="button" data-act="dec" data-k="'+k+'">−</button>' +
+          '<span class="n mono">'+stats[k]+'</span>' +
+          '<button type="button" data-act="inc" data-k="'+k+'">＋</button>' +
+        '</span>';
+      wrap.appendChild(row);
+    });
+    $("pool-left").textContent = POOL_TOTAL - poolUsed();
+    updateStartButton();
+
+    wrap.querySelectorAll("button").forEach(function(btn){
+      var k = btn.getAttribute("data-k");
+      var act = btn.getAttribute("data-act");
+      if(act==="inc"){
+        btn.disabled = poolUsed() >= POOL_TOTAL || stats[k] >= STAT_MAX;
+        btn.addEventListener("click", function(){ stats[k] = Math.min(STAT_MAX, stats[k]+1); renderStatRows(); });
+      } else {
+        btn.disabled = stats[k] <= 0;
+        btn.addEventListener("click", function(){ stats[k] = Math.max(0, stats[k]-1); renderStatRows(); });
+      }
+    });
+  }
+
+  function renderBestRecord(){
+    var best = null;
+    try{ best = localStorage.getItem(BEST_KEY); }catch(e){}
+    $("best-record").textContent = best ? ("최고 기록 — "+best) : "최고 기록 — 아직 없음";
+  }
+
+  // ---------- dice ----------
+  function roll(statKey){
+    var d = 1 + Math.floor(Math.random()*20);
+    return { d:d, total:d+stats[statKey] };
+  }
+  function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  // ---------- log ----------
+  function appendLog(type, headText, bodyText){
+    var log = $("log");
+    var div = document.createElement("div");
+    div.className = "entry " + type;
+    var html = "";
+    if(headText) html += '<div class="head">'+headText+'</div>';
+    html += "<p style='margin:0;'>"+bodyText+"</p>";
+    div.innerHTML = html;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  // ---------- HUD ----------
+  function ramp(c, lo, hi){
+    var t = c/10;
+    var r = Math.round(lo[0]+(hi[0]-lo[0])*t);
+    var g = Math.round(lo[1]+(hi[1]-lo[1])*t);
+    var b = Math.round(lo[2]+(hi[2]-lo[2])*t);
+    return "rgb("+r+","+g+","+b+")";
+  }
+  function corruptionTier(c){ if(c>=9) return 3; if(c>=6) return 2; if(c>=3) return 1; return 0; }
+
+  function renderHud(){
+    var loc = game.location <= 4 ? LOCATIONS[game.location] : {name:"지하 기단"};
+    $("hud-loc-name").textContent = loc.name;
+    $("loc-kicker").textContent = game.location <= 4 ? LOCATIONS[game.location].kicker : "SCENE 5 · 최종장";
+    $("loc-title").textContent = loc.name;
+
+    var sealFill = $("seal-fill");
+    sealFill.style.width = (game.seal*10)+"%";
+    sealFill.style.background = ramp(game.seal, [138,90,63], [192,57,47]);
+    $("seal-num").textContent = game.seal+"/10";
+
+    var corrFill = $("corruption-fill");
+    corrFill.style.width = (game.corruption*10)+"%";
+    corrFill.style.background = ramp(game.corruption, [74,59,107], [139,45,158]);
+    $("corruption-num").textContent = game.corruption+"/10";
+    document.body.setAttribute("data-tier", String(corruptionTier(game.corruption)));
+
+    var dot = $("bond-dot");
+    dot.className = "bond-dot " + game.bond;
+    var label = game.bond==="trust" ? "유키에: 신뢰" : game.bond==="doubt" ? "유키에: 의심" : "유키에: 단절";
+    $("bond-label").textContent = label;
+  }
+
+  // ---------- gauges ----------
+  function addSeal(amount){
+    game.seal = Math.max(0, Math.min(10, game.seal + amount));
+    renderHud();
+  }
+
+  function addCorruption(amount){
+    game.corruption = Math.max(0, Math.min(10, game.corruption + amount));
+    renderHud();
+    if(game.corruption >= 10){
+      endGame("swallowed");
+      return true;
+    }
+    return false;
+  }
+
+  function maybeOmen(){
+    if(game.seal < 3) return;
+    if(Math.random() > 0.42) return;
+    appendLog("omen","기척", pick(OMEN_LINES));
+    var dc = 10 + game.seal;
+    var r = roll("담");
+    appendLog("roll", null, "담 판정 — d20("+r.d+") + "+stats.담+" = "+r.total+" / DC "+dc);
+    if(r.total >= dc){ appendLog("system", null, "숨을 고르며, 다시 정신을 붙든다."); }
+    else{ appendLog("system", null, "다리에 힘이 풀린다. 균열이 조금 더 넓어진다."); addSeal(1); }
+  }
+
+  function maybeIntrude(){
+    if(game.corruption < 6) return;
+    if(Math.random() > 0.28) return;
+    appendLog("intrude", null, pick(INTRUDE_LINES));
+  }
+
+  // ---------- bond ----------
+  function worsenBond(){
+    if(game.bond === "trust"){ game.bond = "doubt"; appendLog("bond","유키에","그녀의 눈빛이 달라진다. 더는 당신을 완전히 믿지 않는 눈치다."); }
+    else if(game.bond === "doubt"){ game.bond = "severed"; appendLog("bond","유키에","그녀가 이제 아무 말도 하지 않는다. 무언가 완전히 끊어졌다."); }
+    renderHud();
+  }
+
+  function doMendBond(){
+    game.bondMended = true;
+    var dc = 13, r = roll("담");
+    if(game.archetype==="miko") r.total += 3;
+    appendLog("roll", null, "담 판정 — d20("+r.d+") + "+stats.담+(game.archetype==="miko"?" (+3 무녀)":"")+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
+    if(r.total >= dc){ game.bond = "trust"; appendLog("bond","유키에","진심 어린 말 몇 마디에, 그녀의 눈빛이 다시 풀린다."); }
+    else{ appendLog("bond","유키에","애써봤지만, 그녀는 여전히 시선을 피한다."); }
+    renderHud();
+    renderActions();
+  }
+
+  // ---------- flow ----------
+  function startGame(){
+    game = {
+      location:1, seal:0, corruption:0, bond:"trust", archetype:selectedArchetype,
+      investigated:{}, bondMended:false, sensedThisLocation:false, digSuccesses:0, ended:false
+    };
+    if(game.archetype==="swordsman") game.corruption = 2;
+    if(game.archetype==="kenpei") game.corruption += 1;
+
+    $("intro-screen").hidden = true;
+    $("game-screen").hidden = false;
+    renderHud();
+
+    var arch = ARCHETYPES.find(function(a){ return a.id === selectedArchetype; });
+    if(arch) appendLog("system", null, arch.flavor);
+
+    enterLocation();
+  }
+
+  function enterLocation(){
+    var loc = LOCATIONS[game.location];
+    game.investigated[game.location] = {};
+    renderHud();
+
+    appendLog("system", null, "— "+loc.name+" —");
+
+    if(game.archetype === "kenpei"){
+      game.sensedThisLocation = true;
+      appendLog("system", null, "미리 받아온 보고서 덕에, 위험을 먼저 짚어낼 수 있었다.");
+      appendLog("hint","예감", pick(loc.hints));
+    } else {
+      var dc = 14, r = roll("지");
+      var sensed = r.total >= dc;
+      game.sensedThisLocation = sensed;
+      appendLog("roll", null, "지 판정 — d20("+r.d+") + "+stats.지+" = "+r.total+" / DC "+dc);
+      if(sensed){ appendLog("hint","예감", pick(loc.hints)); }
+      else{ appendLog("system", null, "특별한 낌새는 느껴지지 않는다."); }
+    }
+
+    presentEncounter();
+  }
+
+  function presentEncounter(){
+    var loc = LOCATIONS[game.location];
+    var enc = loc.encounter;
+    appendLog("narrative", "???", pick(enc.intro));
+
+    var wrap = $("actions");
+    wrap.innerHTML = "";
+    var choices = enc.choices.slice();
+    if(loc.riskyChoice && game.corruption >= 6 && game.bond !== "severed"){
+      choices.push(loc.riskyChoice);
+    }
+    if(loc.hiddenChoice && stats[loc.hiddenChoice.stat] >= loc.hiddenChoice.min){
+      choices.push(loc.hiddenChoice);
+    }
+    choices.forEach(function(choice){
+      var btn = document.createElement("button");
+      btn.className = "act-btn encounter";
+      btn.innerHTML = choice.label + (choice.sub ? "<span class='sub'>"+choice.sub+"</span>" : "");
+      btn.addEventListener("click", function(){
+        choice.resolve();
+        if(game.ended) return;
+        maybeIntrude();
+        if(game.ended) return;
+        renderActions();
+      });
+      wrap.appendChild(btn);
+    });
+  }
+
+  function renderActions(){
+    var wrap = $("actions");
+    wrap.innerHTML = "";
+    var loc = LOCATIONS[game.location];
+    var seen = game.investigated[game.location] || {};
+
+    loc.investigate.forEach(function(item){
+      var done = !!seen[item.id];
+      var btn = document.createElement("button");
+      btn.className = "act-btn" + (done ? " done" : "");
+      btn.innerHTML = (done ? "다시 보기 · "+item.label : item.label) + "<span class='sub'>안전 · 정보만 얻는다</span>";
+      btn.addEventListener("click", function(){ doInvestigate(item.id); });
+      wrap.appendChild(btn);
+    });
+
+    var digBtn = document.createElement("button");
+    digBtn.className = "act-btn dig";
+    digBtn.innerHTML = "파고든다<span class='sub'>술 판정 DC "+loc.dc+" · 다음 장으로 · 침식 위험</span>";
+    digBtn.addEventListener("click", function(){ doDig(); });
+    wrap.appendChild(digBtn);
+
+    if(game.bond === "doubt" && !game.bondMended){
+      var mendBtn = document.createElement("button");
+      mendBtn.className = "act-btn mend";
+      mendBtn.innerHTML = "유키에를 다독인다<span class='sub'>담 판정 DC 13 · 인연 회복 시도 (1회)</span>";
+      mendBtn.addEventListener("click", function(){ doMendBond(); });
+      wrap.appendChild(mendBtn);
+    }
+
+    var retreatBtn = document.createElement("button");
+    retreatBtn.className = "act-btn retreat";
+    retreatBtn.innerHTML = "물러나 결전으로 향한다<span class='sub'>지금까지의 단서를 갖고 지하로</span>";
+    retreatBtn.addEventListener("click", function(){ goToClimax(); });
+    wrap.appendChild(retreatBtn);
+  }
+
+  function doInvestigate(itemId){
+    var loc = LOCATIONS[game.location];
+    var item = loc.investigate.find(function(i){ return i.id === itemId; });
+    if(!item) return;
+    game.investigated[game.location][itemId] = true;
+    appendLog("narrative", item.label, item.text);
+    if(game.archetype === "scholar" && SCHOLAR_NOTES[game.location]){
+      appendLog("narrative","미스카토닉의 지식", SCHOLAR_NOTES[game.location]);
+    }
+    maybeIntrude();
+    if(game.ended) return;
+    renderActions();
+  }
+
+  function doDig(){
+    var loc = LOCATIONS[game.location];
+    var r = roll("술");
+    if(game.archetype === "swordsman") r.total += 2;
+    var ok = r.total >= loc.dc;
+    appendLog("roll", null, "술 판정 — d20("+r.d+") + "+stats.술+(game.archetype==="swordsman"?" +2 (마인)":"")+" = "+r.total+" / DC "+loc.dc+" → "+(ok?"성공":"실패"));
+
+    if(ok){
+      appendLog("narrative","파고들다", pick(loc.digOk));
+      game.digSuccesses += 1;
+      renderHud();
+      addSeal(-1);
+      if(game.ended) return;
+      addSeal(1);
+    } else {
+      appendLog("narrative","파고들다", pick(loc.digFail));
+      var corrDelta = 2;
+      if(game.sensedThisLocation) corrDelta -= 1;
+      if(game.archetype === "onmyoji") corrDelta -= 1;
+      corrDelta = Math.max(0, corrDelta);
+      if(game.sensedThisLocation || game.archetype==="onmyoji"){
+        appendLog("system", null, "그래도 대비가 있었던 덕에, 크게 침식되지는 않는다.");
+      }
+      renderHud();
+      addSeal(1);
+      if(game.ended) return;
+      if(corrDelta > 0){ addCorruption(corrDelta); }
+    }
+    if(game.ended) return;
+
+    maybeOmen();
+    if(game.ended) return;
+    maybeIntrude();
+    if(game.ended) return;
+
+    if(game.location < 4){ game.location += 1; enterLocation(); }
+    else{ goToClimax(); }
+  }
+
+  function goToClimax(){
+    if(game.ended) return;
+    game.location = 5;
+    enterClimax();
+  }
+
+  // ---------- climax ----------
+  function enterClimax(){
+    renderHud();
+    appendLog("system", null, "— 지하 기단 —");
+
+    if(game.corruption >= 10){
+      endGame("swallowed");
+      return;
+    }
+
+    appendLog("narrative", null, "돌계단을 내려가자, 봉인의 중심이 눈앞에 있다. 균열 사이로 무언가 숨 쉬듯 진동한다. 이제, 선택해야 한다.");
+    presentClimaxChoices();
+  }
+
+  function presentClimaxChoices(){
+    var wrap = $("actions");
+    wrap.innerHTML = "";
+
+    var sealDC = 10 + game.seal - Math.min(3, game.digSuccesses);
+    var voidDC = 12 + Math.floor(game.corruption/2) - Math.min(2, game.digSuccesses);
+
+    var rebuildBtn = document.createElement("button");
+    rebuildBtn.className = "act-btn encounter";
+    rebuildBtn.innerHTML = "봉인을 다시 세운다<span class='sub'>술 판정 DC "+sealDC+"</span>";
+    rebuildBtn.addEventListener("click", function(){ attemptRebuild(sealDC); });
+    wrap.appendChild(rebuildBtn);
+
+    var destroyBtn = document.createElement("button");
+    destroyBtn.className = "act-btn encounter";
+    destroyBtn.innerHTML = "소신을 파괴한다<span class='sub'>담 판정 DC "+voidDC+"</span>";
+    destroyBtn.addEventListener("click", function(){ attemptDestroy(voidDC); });
+    wrap.appendChild(destroyBtn);
+
+    var armyBtn = document.createElement("button");
+    armyBtn.className = "act-btn risky";
+    armyBtn.innerHTML = "제국 육군에 협조를 요청한다<span class='sub'>판정 없이 확실한 선택</span>";
+    armyBtn.addEventListener("click", function(){ endGame("seized"); });
+    wrap.appendChild(armyBtn);
+
+    var giveUpBtn = document.createElement("button");
+    giveUpBtn.className = "act-btn retreat";
+    giveUpBtn.innerHTML = "포기하고 물러난다<span class='sub'>판정 없이 즉시 종료</span>";
+    giveUpBtn.addEventListener("click", function(){ endGame("buried"); });
+    wrap.appendChild(giveUpBtn);
+  }
+
+  function attemptRebuild(dc){
+    var r = roll("술");
+    appendLog("roll", null, "술 판정 — d20("+r.d+") + "+stats.술+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
+    if(r.total >= dc){ endGame("sealed"); return; }
+    appendLog("narrative", null, "진언이 도중에 끊긴다. 균열이 한층 더 벌어진다.");
+    addSeal(2);
+    if(game.ended) return;
+    addCorruption(1);
+    if(game.ended) return;
+    presentClimaxChoices();
+  }
+
+  function attemptDestroy(dc){
+    var r = roll("담");
+    appendLog("roll", null, "담 판정 — d20("+r.d+") + "+stats.담+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
+    if(r.total >= dc){ endGame("destroyed"); return; }
+    appendLog("narrative", null, "의지가 흔들리는 순간, 그것의 기운이 정신을 파고든다.");
+    addCorruption(2);
+    if(game.ended) return;
+    presentClimaxChoices();
+  }
+
+  // ---------- ending ----------
+  function endGame(key){
+    if(game.ended) return;
+    game.ended = true;
+
+    var titles = { sealed:"봉인 재건 — 다시, 잠들다", destroyed:"소멸 — 그 자리에 없는 사람", seized:"수거 — 누구를 위한 봉인이었나", buried:"은폐 — 아무 일도 없었다", swallowed:"폭주 — 그해 9월" };
+
+    var bodies = {
+      sealed:"부적이 마지막 진언과 함께 타오르며, 균열이 서서히 아문다. 아마미야가 사람들은 그날 밤의 기억을 대부분 잃은 채 깨어난다. 저택은 '원인 모를 붕괴 위험'을 이유로 폐쇄되고, 신작로는 우회로로 변경된다. 사건은 조용히 묻힌다. 그리고 며칠 후, 전혀 다른 지역에서 올라온 실종 신고서 한 장이 책상 위에 툭 놓인다. 잠든 것은, 하나뿐이 아니었다.",
+      destroyed: game.bond==="trust"
+        ? "소신은 완전히 사라진다. 가장 확실한 승리였다. 하지만 유키에는 당신과 함께 그 자리에 남았다 — 의식과 함께, 처음부터 없었던 사람처럼. 남은 이들의 기억 속에서도 그녀는 서서히 흐려진다. 세계는 구했다. 다만 그 사실을 기억하는 사람이, 하나둘 줄어들 뿐이다."
+        : "소신은 완전히 사라진다. 대가는 당신 스스로가 치렀다 — 술식의 마지막 한 조각까지, 자신의 일부를 함께 태워 넣었다. 살아남은 이들은 당신이 예전과 조금 달라졌다고 말한다. 무엇이 달라졌는지는, 아무도 정확히 설명하지 못한다.",
+      seized:"제국 육군 특별과의 인원들이 의식 도중 들이닥쳐 파편을 확보해간다. 당신들은 자신이 처음부터 이용당했음을 깨닫지만, 이미 늦었다. 사건은 '산사태 사고'로 짧게 보도되고, 며칠 후 신문 한구석에 '육군성, 신형 연구소 설립'이라는 기사가 조용히 실린다." + (game.archetype==="kenpei" ? " 당신의 옛 상관이 그 명단 맨 위에 있다." : ""),
+      buried:"어느 쪽도 완전히 끝맺지 못한 채, 당신들은 손을 뗀다. 신문에는 '아마미야가 일가족 동반 자살'이라 짧게 실리고, 세상은 신경 쓰지 않는다. 신작로는 예정대로 완공되고, 전등이 하나둘 켜진다. 진실을 아는 자들만 남아, 서로 다른 곳을 바라보며 흩어진다.",
+      swallowed:"부적도, 진언도, 이제는 소용이 없다. 저택 전체가 무언가 다른 것의 일부가 되어가는 감각 속에서, 이야기는 몇 달을 건너뛴다. 1923년 9월, 도쿄. 그날 벌어진 재난이 정말 땅 밑의 흔들림뿐이었는지, 이 사건을 아는 이들은 다시는 확신하지 못했다."
+    };
+
+    $("game-screen").hidden = true;
+    var scr = $("ending-screen");
+    scr.hidden = false;
+    scr.className = "ending" + (key==="swallowed" ? " dark" : "");
+    $("ending-title").textContent = titles[key];
+    $("ending-body").innerHTML = "<p>"+bodies[key]+"</p>";
+    $("ending-seal").textContent = game.seal+"/10";
+    $("ending-corruption").textContent = game.corruption+"/10";
+
+    var note = "";
+    try{
+      var record = titles[key];
+      var best = localStorage.getItem(BEST_KEY);
+      if(key === "sealed" || key === "destroyed"){
+        localStorage.setItem(BEST_KEY, record);
+        note = best ? "" : "첫 완주 기록입니다.";
+      }
+    }catch(e){}
+    $("ending-record-note").textContent = note;
+  }
+
+  // ---------- wire up ----------
+  document.addEventListener("DOMContentLoaded", function(){
+    renderArchetypes();
+    renderStatRows();
+    renderBestRecord();
+    $("start-btn").addEventListener("click", startGame);
+    $("retry-btn").addEventListener("click", function(){ location.reload(); });
+  });
+})();
+</script>
