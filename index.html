@@ -429,12 +429,45 @@
   // 신원별 능력치 보너스 — 배분과 별개로 더해진다
   var ARCHETYPE_BONUS = { onmyoji:{술:1}, swordsman:{담:1}, scholar:{지:1}, miko:{담:1}, kenpei:{지:1} };
 
-  var SCHOLAR_NOTES = {
-    1:"그을림 자국은 화기가 아니라 저온에서 생긴다 — 미스카토닉의 문헌에서 본 적 있는 흔적이다.",
-    2:"찢겨나간 족보 페이지, 그 위치로 미루어 짐작건대 감춰진 이름은 하나뿐이다.",
-    3:"인형 목에 감긴 실의 매듭은 서양 항해술의 매듭과 같다 — 이 집 사람의 것이 아니다.",
-    4:"나무의 결에 새겨진 문자, 그 절반은 인류의 언어 체계에 속하지 않는다.",
-    5:"회랑에 새겨진 연도들, 그 간격이 규칙적이지 않다 — 땅이 유난히 크게 흔들렸던 해와 정확히 겹친다."
+  // 신원별 해석 렌즈 — 같은 장면도 신원마다 다르게 읽어낸다 (조사 시 1회, 장마다)
+  var ARCHETYPE_NOTE_LABEL = { onmyoji:"음양사의 감각", swordsman:"핏속의 감각", scholar:"미스카토닉의 지식", miko:"무녀의 감", kenpei:"헌병의 눈" };
+
+  var ARCHETYPE_NOTES = {
+    onmyoji:{
+      1:"등불 그림자의 결이 예사롭지 않다. 손끝으로 결계를 그려보니, 이 방 전체에 아직 옅은 술식의 잔향이 남아 있다.",
+      2:"서가에 꽂힌 진언서들, 그 중 절반은 이 가문이 아니라 다른 유파의 것이다. 언젠가 외부에서 도움을 구했던 흔적이다.",
+      3:"유키에 주변의 공기가 미세하게 뒤틀려 있다. 결계로도, 부적으로도 완전히 막을 수 없는 무언가가 이미 스며들었다.",
+      4:"무너진 사당 자리, 결계의 흔적이 나선형으로 파여 있다. 이런 방식의 봉인은 처음 본다 — 아니, 어디선가 분명 본 적이 있다.",
+      5:"명패마다 새겨진 진언의 필체가 조금씩 다르다. 대를 이어 서로 다른 이들이 이 봉인을 고쳐 왔다는 뜻이다."
+    },
+    swordsman:{
+      1:"핏속의 것이 이 방에서 유난히 소란스럽다. 마치 예전에 와본 적 있다는 듯이.",
+      2:"핏속의 것이 이 방에서는 도리어 잠잠하다. 마치 이곳만은 피하고 싶어 하는 것처럼.",
+      3:"그녀에게 다가서자 핏속의 것이 반응한다 — 마치 동족을 알아보듯이.",
+      4:"그 눈이 이쪽을 보는 순간, 핏속의 것이 인사라도 하듯 조용해진다.",
+      5:"이 회랑 전체가 핏속의 것에게는 익숙한 냄새로 가득하다. 마치 고향에 돌아온 것처럼."
+    },
+    scholar:{
+      1:"그을림 자국은 화기가 아니라 저온에서 생긴다 — 미스카토닉의 문헌에서 본 적 있는 흔적이다.",
+      2:"찢겨나간 족보 페이지, 그 위치로 미루어 짐작건대 감춰진 이름은 하나뿐이다.",
+      3:"인형 목에 감긴 실의 매듭은 서양 항해술의 매듭과 같다 — 이 집 사람의 것이 아니다.",
+      4:"나무의 결에 새겨진 문자, 그 절반은 인류의 언어 체계에 속하지 않는다.",
+      5:"회랑에 새겨진 연도들, 그 간격이 규칙적이지 않다 — 땅이 유난히 크게 흔들렸던 해와 정확히 겹친다."
+    },
+    miko:{
+      1:"할머니의 목소리가 문득 속삭인다. \"여기, 누군가 아직 떠나지 못했다.\"",
+      2:"먼지 쌓인 책상 위, 향을 태운 자국이 원을 그리고 있다. 누군가 여기서 여러 번 기도를 올렸다.",
+      3:"그녀의 그림자가 등불보다 한 박자 늦게 움직인다. 몸은 여기 있지만, 무언가 다른 것도 함께 있다.",
+      4:"나무들 사이, 죽은 이들이 아니라 다른 무언가가 지켜보고 있다. 할머니라면 이걸 '길잡이'라 불렀을 것이다.",
+      5:"벽을 따라 걷는 내내, 여러 목소리가 겹쳐 들린다. 할머니만이 아니다 — 대를 이은 다른 무당들의 목소리도 섞여 있다."
+    },
+    kenpei:{
+      1:"보고서에 적히지 않은 것들이 눈에 들어온다 — 이 현장, 처음 조사한 인원이 이미 무언가를 은폐했다.",
+      2:"서재 자물쇠, 최근에 새로 바꾼 흔적이 있다. 누가, 무엇으로부터 이 방을 지키려 했을까.",
+      3:"그녀의 진술서 초본을 몰래 훑는다. 첫 진술과 지금 하는 말이 미묘하게 다르다.",
+      4:"발자국의 보폭이 일정하다 — 사람이 아니라, 사람처럼 걷도록 훈련된 무언가의 것이다.",
+      5:"회랑 어딘가, 최근 누군가 다녀간 발자국과 함께 낯선 군화 자국이 섞여 있다."
+    }
   };
 
   // 신원별 전용 히든 행동 (1회) — 판정 없이 확정적으로 발동
@@ -982,7 +1015,7 @@
   function startGame(){
     game = {
       location:1, seal:0, corruption:0, bond:"trust", archetype:selectedArchetype,
-      investigated:{}, scholarNoteShown:{}, bondMended:false, sensedThisLocation:false, digSuccesses:0, ended:false,
+      investigated:{}, archetypeNoteShown:{}, bondMended:false, sensedThisLocation:false, digSuccesses:0, ended:false,
       archetypeActionUsed:false
     };
     if(game.archetype==="swordsman") game.corruption = 2;
@@ -1114,9 +1147,10 @@
     if(!item) return;
     game.investigated[game.location][itemId] = true;
     appendLog("narrative", item.label, item.text);
-    if(game.archetype === "scholar" && SCHOLAR_NOTES[game.location] && !game.scholarNoteShown[game.location]){
-      game.scholarNoteShown[game.location] = true;
-      appendLog("narrative","미스카토닉의 지식", SCHOLAR_NOTES[game.location]);
+    var notes = ARCHETYPE_NOTES[game.archetype];
+    if(notes && notes[game.location] && !game.archetypeNoteShown[game.location]){
+      game.archetypeNoteShown[game.location] = true;
+      appendLog("narrative", ARCHETYPE_NOTE_LABEL[game.archetype], notes[game.location]);
     }
     maybeIntrude();
     if(game.ended) return;
