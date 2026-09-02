@@ -8,7 +8,9 @@
 
 ## 실행 방법
 
-`index.html` 파일을 브라우저로 열기만 하면 됩니다.
+바로 플레이: **https://03jiho.github.io/kagegami-rondo-trpg-/**
+
+로컬에서 열려면 `index.html` 파일을 브라우저로 열면 됩니다.
 
 ```bash
 # 예시 (로컬에서 바로 열기)
@@ -28,4 +30,4 @@ start index.html
 
 - 순수 HTML / CSS / JavaScript (프레임워크 없음, 파일 하나로 동작)
 - 폰트: Google Fonts (Nanum Myeongjo, Noto Serif KR, IBM Plex Mono)
-- 최고 기록(완주한 엔딩)은 `localStorage`에 저장되어 시작 화면에 표시된다
+- 지금까지 확인한 결말(5종 중 몇 개)은 `localStorage`에 저장되어 시작 화면에 표시된다
