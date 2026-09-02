@@ -180,6 +180,9 @@
     transition:border-color .15s, background .15s; font-family:'Noto Serif KR',serif;
   }
   .act-btn .sub{display:block; font-size:11.5px; color:var(--ink-soft); margin-top:3px; font-family:'IBM Plex Mono',monospace;}
+  .act-btn .sub .chance{color:var(--vermillion);}
+  .act-btn .emo{margin-right:4px;}
+  .arch-card .bonus{display:block; font-size:11px; color:var(--vermillion); margin-top:2px; font-family:'IBM Plex Mono',monospace;}
   .act-btn:hover{border-color:var(--vermillion); background:#efe6d4;}
   .act-btn.dig{border-color:var(--washi-shadow);}
   .act-btn.retreat{border-color:var(--bond-trust); color:#3f5a38;}
@@ -227,6 +230,18 @@
     padding:10px 0; margin:18px 0;
   }
   .best-record b{color:var(--vermillion);}
+
+  .glossary{
+    background:#f4efe1; border:1px solid var(--washi-shadow); border-radius:2px;
+    padding:10px 14px; margin:0 0 18px; color:var(--ink);
+  }
+  .glossary summary{cursor:pointer; font-size:13px; font-weight:700; color:var(--vermillion); list-style:revert;}
+  .glossary summary span{font-weight:400; color:var(--ink-soft); font-size:11.5px;}
+  .glossary dl{margin:10px 0 2px; font-size:12.5px; line-height:1.7;}
+  .glossary dt{font-weight:700; color:var(--ink); margin-top:8px;}
+  .glossary dt:first-child{margin-top:0;}
+  .glossary dd{margin:2px 0 0; color:var(--ink-soft);}
+  .glossary b{color:var(--vermillion);}
 
   .block-title{
     font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft);
@@ -315,6 +330,18 @@
     <h1>카게가미 론도</h1>
     <p>다이쇼 시대의 어느 해, 도쿄 외곽. 근대화의 신작로가 산기슭까지 뻗어오던 어느 날, 자작 가문 아마미야가에서 일가족 상해 사건이 벌어진다. 현장에는 칼자국과 함께 기괴한 점액, 그리고 오래전 새겨진 결계의 흔적이 남아 있었다.</p>
     <p>가문이 대대로 지켜온 봉인이, 공사의 진동으로 금이 가기 시작한 것이다. 봉인 아래 잠든 것은 민담 속 요괴가 아니다 — 별의 저편에서 흘러든, 이름조차 온전히 발음할 수 없는 무언가의 파편이다.</p>
+    <p>아마미야가 사람들은 그것을 그저 '소신(小神)'이라 불렀다 — 진짜 이름을 함부로 입에 담지 않기 위한 오랜 금기였다. 하지만 가장 오래된 기록 한 귀퉁이에는 다른 글자가 남아 있다: <b>카게가미(影神)</b>. 그리고 이 봉인은 이번이 처음이 아니다. 대를 이어 몇 번이고 금이 가고, 몇 번이고 다시 메워졌다 — 같은 곡이 처음으로 되돌아가 반복되듯이. 그래서 사람들은 이 되풀이를 '론도'라 불렀다.</p>
+
+    <details class="glossary">
+      <summary>용어 안내 <span>(TRPG가 처음이라면 열어보세요)</span></summary>
+      <dl>
+        <dt>균열 (봉인 게이지)</dt><dd>저택 아래 봉인이 얼마나 깨졌는지. 10이 되면 카게가미가 스스로 봉인을 뚫고 나온다.</dd>
+        <dt>침식 (내 게이지)</dt><dd>카게가미의 기운이 당신 자신에게 얼마나 스며들었는지. 10이 되면 당신이 그것에게 삼켜진다.</dd>
+        <dt>인연</dt><dd>유일한 목격자 유키에와의 신뢰. 위험한 선택을 할수록 무너지고, 무너지면 그녀가 등을 돌릴 수도 있다.</dd>
+        <dt>주사위 판정</dt><dd>d20(20면체 주사위) + 스탯을 더해 DC(목표 수치) 이상이 나오면 성공. 이해하기 쉽도록 선택지마다 대략적인 성공 확률(%)도 함께 표시된다.</dd>
+        <dt>최종장의 네 갈래 — 재건 / 소멸 / 수거 / 은폐</dt><dd><b>재건</b>은 봉인을 고쳐 카게가미를 다시 가두는 것, <b>소멸</b>은 카게가미의 파편 자체를 완전히 없애는 것, <b>수거</b>는 이 일을 군에 넘기고 손을 떼는 것, <b>은폐</b>는 아무것도 하지 않고 모든 걸 덮은 채 물러나는 것이다. 어느 쪽을 골라도 반드시 대가가 따른다.</dd>
+      </dl>
+    </details>
 
     <div class="best-record" id="best-record">최고 기록 — 아직 없음</div>
 
@@ -386,25 +413,57 @@
   var STAT_MAX = 4;
 
   var ARCHETYPES = [
-    { id:"onmyoji", name:"퇴마 음양사", desc:"파고들다 실패해도 침식을 덜 입는다",
+    { id:"onmyoji", name:"퇴마 음양사", desc:"파고들다 실패해도 침식을 덜 입는다", bonusLabel:"술 +1",
       flavor:"당신은 어릴 적부터 부적과 진언을 배웠다. 눈에 보이지 않는 것들과 거래하는 법을 안다." },
-    { id:"swordsman", name:"마인 검객", desc:"파고들 때 유리하지만, 이미 침식된 채 시작한다",
+    { id:"swordsman", name:"마인 검객", desc:"파고들 때 유리하지만, 이미 침식된 채 시작한다", bonusLabel:"담 +1",
       flavor:"당신의 몸에는 오래전 섞인 무언가의 피가 흐른다. 그것이 때때로 당신 대신 손을 움직인다." },
-    { id:"scholar", name:"근대 학자", desc:"조사할 때마다 남들이 못 보는 것을 하나 더 본다",
+    { id:"scholar", name:"근대 학자", desc:"조사할 때마다 남들이 못 보는 것을 하나 더 본다", bonusLabel:"지 +1",
       flavor:"미스카토닉에서 배운 것들은, 이 나라의 누구에게도 설명할 수 없는 것들이었다." },
-    { id:"miko", name:"무녀", desc:"흔들린 인연을 회복시키는 데 능하다",
+    { id:"miko", name:"무녀", desc:"흔들린 인연을 회복시키는 데 능하다", bonusLabel:"담 +1",
       flavor:"할머니의 목소리가 아직도 당신 안에 남아 있다. 가끔은, 그녀가 대신 말하는 것 같기도 하다." },
-    { id:"kenpei", name:"헌병 조사관", desc:"위험을 미리 보고받아 항상 예감이 들어맞는다",
+    { id:"kenpei", name:"헌병 조사관", desc:"위험을 미리 보고받아 항상 예감이 들어맞는다", bonusLabel:"지 +1",
       flavor:"당신은 명령을 받고 이곳에 왔다. 하지만 명령서에 적히지 않은 것들이 너무 많다." }
   ];
   var selectedArchetype = null;
+
+  // 신원별 능력치 보너스 — 배분과 별개로 더해진다
+  var ARCHETYPE_BONUS = { onmyoji:{술:1}, swordsman:{담:1}, scholar:{지:1}, miko:{담:1}, kenpei:{지:1} };
 
   var SCHOLAR_NOTES = {
     1:"그을림 자국은 화기가 아니라 저온에서 생긴다 — 미스카토닉의 문헌에서 본 적 있는 흔적이다.",
     2:"찢겨나간 족보 페이지, 그 위치로 미루어 짐작건대 감춰진 이름은 하나뿐이다.",
     3:"인형 목에 감긴 실의 매듭은 서양 항해술의 매듭과 같다 — 이 집 사람의 것이 아니다.",
-    4:"나무의 결에 새겨진 문자, 그 절반은 인류의 언어 체계에 속하지 않는다."
+    4:"나무의 결에 새겨진 문자, 그 절반은 인류의 언어 체계에 속하지 않는다.",
+    5:"회랑에 새겨진 연도들, 그 간격이 규칙적이지 않다 — 땅이 유난히 크게 흔들렸던 해와 정확히 겹친다."
   };
+
+  // 신원별 전용 히든 행동 (1회) — 판정 없이 확정적으로 발동
+  var ARCHETYPE_ACTIONS = {
+    onmyoji:{ label:"선조의 마지막 부적을 태운다", sub:"퇴마 음양사의 비장의 수 · 판정 없이 성공",
+      body:"품에 넣어둔, 대대로 전해지던 마지막 한 장을 태운다. 불꽃이 파랗게 일렁이며 균열 한 켠이 스스로 아문다.",
+      effect:function(){ addSeal(-1); } },
+    swordsman:{ label:"몸속 그것에게 잠시 힘을 빌린다", sub:"마인 검객의 위험한 수 · 판정 없이 성공 · 침식 +1",
+      body:"핏줄 속의 것이 기다렸다는 듯 응답한다. 시야가 붉게 물들며, 다음 순간 눈앞의 장애가 산산이 흩어져 있다.",
+      effect:function(){ addSeal(-2); addCorruption(1); } },
+    scholar:{ label:"미스카토닉식 대항 의식을 시도한다", sub:"근대 학자의 지식 · 판정 없이 성공",
+      body:"정규 진언이 아니다. 하지만 문헌으로만 배운 서구식 대항 의식이, 놀랍게도 이 낯선 것에게도 먹힌다.",
+      effect:function(){ addSeal(-1); } },
+    miko:{ label:"할머니의 목소리를 빌려 축원한다", sub:"무녀의 핏줄 · 판정 없이 성공",
+      body:"눈을 감자 할머니의 목소리가 겹쳐 들린다. 그 축원이 당신 대신 어둠을 한 걸음 밀어낸다.",
+      effect:function(){ addCorruption(-1); } },
+    kenpei:{ label:"본부에 무전으로 지원을 요청한다", sub:"헌병 조사관의 인맥 · 판정 없이 성공",
+      body:"짧은 무전 몇 마디로 충분하다. 곧 돌아온 응답에는, 이전에도 비슷한 사건이 있었다는 짧은 암시가 섞여 있다.",
+      effect:function(){ addSeal(-1); appendLog("system", null, "\"1854년, 그리고 1891년. 기록에 이런 게 또 있었답니다.\" 무전 너머 목소리가 낮게 덧붙인다."); } }
+  };
+
+  // 간토 대지진(1923) 복선 — 균열이 깊어질수록 등장 확률이 오른다
+  var TREMOR_LINES = [
+    "발밑이 아주 짧게, 그러나 분명히 흔들린다. 등불이 잠깐 기울었다가 제자리로 돌아온다.",
+    "찻잔 속 물이 저 혼자 잔물결을 그린다. 바람 한 점 없는데도.",
+    "먼 신문팔이 소년의 목소리가 담을 넘어온다 — \"요즘 잔진동이 부쩍 잦다는데요!\"",
+    "처마 밑 풍경이 이유 없이 딸랑, 한 번 울린다.",
+    "유키에가 문득 발밑을 내려다본다. \"방금… 땅이 울린 것 같지 않아요?\""
+  ];
 
   var LOCATIONS = [
     null,
@@ -420,18 +479,16 @@
         intro:["안채에서 살아남은 하인 하나가 구석에서 떨고 있다.","하인이 당신들을 보자마자 앞뒤 안 맞는 말을 쏟아낸다."],
         choices:[
           { label:"차분히 다독이며 듣는다", sub:"담 판정 DC 12", resolve:function(){
-            var dc=12, r=roll("담");
-            appendLog("roll", null, "담 판정 — d20("+r.d+") + "+stats.담+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
-            if(r.total>=dc){ appendLog("narrative","하인의 증언","떨리는 목소리 사이로, 그날 밤 서재 쪽에서 들려온 이상한 소리에 대한 명확한 증언을 얻는다."); }
+            var dc=12;
+            if(doRoll("담", dc)){ appendLog("narrative","하인의 증언","떨리는 목소리 사이로, 그날 밤 서재 쪽에서 들려온 이상한 소리에 대한 명확한 증언을 얻는다."); }
             else{ appendLog("narrative","하인의 증언","하인이 결국 겁에 질려 자리를 피한다."); }
           }},
           { label:"핵심만 캐묻는다", sub:"안전", resolve:function(){
             appendLog("narrative","하인의 증언","다그쳐 묻자 짧은 대답만 돌아온다. 소득은 있지만 크지 않다.");
           }},
           { label:"부적으로 진정시킨다", sub:"술 판정 DC 13", resolve:function(){
-            var dc=13, r=roll("술");
-            appendLog("roll", null, "술 판정 — d20("+r.d+") + "+stats.술+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
-            if(r.total>=dc){
+            var dc=13;
+            if(doRoll("술", dc)){
               appendLog("narrative","하인의 증언","부적의 기운이 스미자, 하인 자신도 몰랐던 억눌린 기억까지 끌려나온다.");
               addSeal(-1);
             } else {
@@ -458,15 +515,13 @@
         intro:["책상 아래, 부적으로 겹겹이 봉해진 서랍이 있다.","자물쇠 대신 낡은 진언이 서랍을 감싸고 있다."],
         choices:[
           { label:"부적으로 봉인을 풀어낸다", sub:"술 판정 DC 13", resolve:function(){
-            var dc=13, r=roll("술");
-            appendLog("roll", null, "술 판정 — d20("+r.d+") + "+stats.술+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
-            if(r.total>=dc){ appendLog("narrative","봉인된 서랍","봉인 진언의 원본을 손에 넣는다. 이 결계가 처음 세워진 방식이 고스란히 담겨 있다."); addSeal(-1); }
+            var dc=13;
+            if(doRoll("술", dc)){ appendLog("narrative","봉인된 서랍","봉인 진언의 원본을 손에 넣는다. 이 결계가 처음 세워진 방식이 고스란히 담겨 있다."); addSeal(-1); }
             else{ appendLog("narrative","봉인된 서랍","진언이 손안에서 뒤틀리며 무언가 스며든다."); addCorruption(1); }
           }},
           { label:"자물쇠 구조를 분석해 연다", sub:"지 판정 DC 12", resolve:function(){
-            var dc=12, r=roll("지");
-            appendLog("roll", null, "지 판정 — d20("+r.d+") + "+stats.지+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
-            if(r.total>=dc){ appendLog("narrative","봉인된 서랍","기계 장치를 정확히 짚어내 안전하게 서랍을 연다."); }
+            var dc=12;
+            if(doRoll("지", dc)){ appendLog("narrative","봉인된 서랍","기계 장치를 정확히 짚어내 안전하게 서랍을 연다."); }
             else{ appendLog("narrative","봉인된 서랍","시간만 허비했다. 서랍은 여전히 굳게 닫혀 있다."); addSeal(1); }
           }},
           { label:"그냥 힘으로 부순다", sub:"안전 · 가문의 신뢰를 해친다", resolve:function(){
@@ -491,9 +546,8 @@
         intro:["유키에가 떨리는 목소리로 그날 밤을 이야기하기 시작한다.","그녀의 이야기는 자꾸 앞뒤가 어긋난다 — 마치 두 개의 기억이 겹쳐 있는 것처럼."],
         choices:[
           { label:"두려움에 공감하며 듣는다", sub:"담 판정 DC 13", resolve:function(){
-            var dc=13, r=roll("담");
-            appendLog("roll", null, "담 판정 — d20("+r.d+") + "+stats.담+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
-            if(r.total>=dc){
+            var dc=13;
+            if(doRoll("담", dc)){
               appendLog("narrative","유키에의 증언","그녀가 마침내 진짜 기억 한 조각을 꺼내놓는다. 눈물과 함께.");
               if(game.bond==="trust"){ appendLog("bond","유키에","그녀가 처음으로 당신의 손을 마주 잡는다."); }
             } else {
@@ -501,9 +555,8 @@
             }
           }},
           { label:"모순을 논리적으로 짚어낸다", sub:"지 판정 DC 12", resolve:function(){
-            var dc=12, r=roll("지");
-            appendLog("roll", null, "지 판정 — d20("+r.d+") + "+stats.지+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
-            if(r.total>=dc){ appendLog("narrative","유키에의 증언","모순을 짚어내자, 그녀가 이미 그것과 접촉한 적이 있다는 사실이 드러난다."); }
+            var dc=12;
+            if(doRoll("지", dc)){ appendLog("narrative","유키에의 증언","모순을 짚어내자, 그녀가 이미 그것과 접촉한 적이 있다는 사실이 드러난다."); }
             else{ appendLog("narrative","유키에의 증언","추궁하듯 몰아붙이자 그녀가 방어적으로 변한다."); worsenBond(); }
           }},
           { label:"조용히 지켜만 본다", sub:"안전", resolve:function(){
@@ -527,15 +580,13 @@
         intro:["앞이 벽처럼 가로막힌다 — 아무것도 없는데, 나아갈 수가 없다.","어둠 속에서 커다란 눈 하나가 천천히 이쪽을 향한다."],
         choices:[
           { label:"부적과 오행으로 밀어낸다", sub:"술 판정 DC 15", resolve:function(){
-            var dc=15, r=roll("술");
-            appendLog("roll", null, "술 판정 — d20("+r.d+") + "+stats.술+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
-            if(r.total>=dc){ appendLog("narrative","누리카베노메","벽이 갈라지듯 물러난다. 그것이 지키던 비밀 하나가 고스란히 드러난다."); addSeal(-1); }
+            var dc=15;
+            if(doRoll("술", dc)){ appendLog("narrative","누리카베노메","벽이 갈라지듯 물러난다. 그것이 지키던 비밀 하나가 고스란히 드러난다."); addSeal(-1); }
             else{ appendLog("narrative","누리카베노메","눈이 당신을 정면으로 응시한다. 무언가가 정신을 스치고 지나간다."); addCorruption(2); }
           }},
           { label:"움직이지 않고 버틴다", sub:"담 판정 DC 14", resolve:function(){
-            var dc=14, r=roll("담");
-            appendLog("roll", null, "담 판정 — d20("+r.d+") + "+stats.담+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
-            if(r.total>=dc){ appendLog("narrative","누리카베노메","숨소리 하나 흔들리지 않는다. 그것이 흥미를 잃고 서서히 물러난다."); }
+            var dc=14;
+            if(doRoll("담", dc)){ appendLog("narrative","누리카베노메","숨소리 하나 흔들리지 않는다. 그것이 흥미를 잃고 서서히 물러난다."); }
             else{ appendLog("narrative","누리카베노메","다리가 떨린다. 그것이 몸을 돌려 다른 곳으로 미끄러지듯 사라진다 — 어딘가 다른 균열을 향해."); addSeal(1); }
           }}
         ]
@@ -548,6 +599,46 @@
       hiddenChoice:{ stat:"담", min:4, label:"눈 하나 깜빡이지 않고 마주 본다", sub:"담 4 이상 · 판정 없이 성공", resolve:function(){
         addSeal(-1);
         appendLog("narrative","누리카베노메","시선을 피하지 않는다. 오히려 그것이 먼저 흔들리며 물러난다.");
+      }}
+    },
+    { name:"봉인의 회랑", kicker:"SCENE 5 · 대대로 이어진 봉인", dc:22,
+      hints:["벽을 따라 이름 모를 명패들이 끝없이 이어진다.","공기가 유난히 무겁다 — 여러 번 다시 메워진 흙 냄새다."],
+      investigate:[
+        {id:"tablets", label:"벽을 따라 늘어선 명패들을 살핀다", text:"대대로 이 자리를 지킨 이들의 이름과 연도가 새겨져 있다. 몇몇 이름 옆에는 유난히 깊게 파인 균열 자국이 남아 있다."},
+        {id:"carving", label:"가장 안쪽 벽의 글자를 살핀다", text:"다른 것보다 오래된 필체로 두 글자가 새겨져 있다 — 影神, 카게가미. 그 아래 작은 글씨로 한 줄: '봉인은, 이곳 하나가 아니다.'"}
+      ],
+      digOk:["부적을 태우자 회랑 전체가 응답하듯 나직이 울린다. 이 자리가 정말 여러 번 다시 세워졌다는 사실이 손끝으로 전해진다.","진언을 읊는 순간, 벽에 새겨진 옛 이름들이 잠깐 빛을 머금었다 가라앉는다."],
+      digFail:["진언이 회랑의 메아리에 뒤섞여 뒤틀린다. 손끝이 저릿하게 마비된다.","부적이 채 타기도 전에 바스러진다. 회랑의 냉기가 뼛속까지 스민다."],
+      encounter:{
+        intro:["회랑 끝, 낡은 궤 하나가 벽에 반쯤 파묻혀 있다.","바닥에 누군가 최근에 다녀간 발자국 — 흙이 아직 마르지 않았다."],
+        choices:[
+          { label:"궤를 열어 안을 확인한다", sub:"술 판정 DC 17", resolve:function(){
+            var dc=17;
+            if(doRoll("술", dc)){
+              appendLog("narrative","낡은 궤","궤 안에는 이 저택과 똑같은 문양이 찍힌 서신 몇 통이 들어 있다. 발신지는 저마다 다른 지방이다 — 이 봉인이 유일하지 않다는 확실한 증거다.");
+              addSeal(-1);
+            } else {
+              appendLog("narrative","낡은 궤","자물쇠가 손안에서 뒤틀리며 서늘한 기운이 손목을 타고 오른다.");
+              addCorruption(1);
+            }
+          }},
+          { label:"발자국을 따라가 본다", sub:"지 판정 DC 16", resolve:function(){
+            var dc=16;
+            if(doRoll("지", dc)){
+              appendLog("narrative","발자국","발자국은 회랑 밖, 정원 방향에서 들어와 다시 정원 쪽으로 나간다. 이 저택에 당신들 말고 다른 방문자가 있었다.");
+            } else {
+              appendLog("narrative","발자국","발자국을 쫓다 갈림길에서 놓친다. 등 뒤로 서늘한 시선이 스친다.");
+              addCorruption(1);
+            }
+          }},
+          { label:"조용히 지나친다", sub:"안전", resolve:function(){
+            appendLog("narrative","회랑","괜히 헤집을 필요는 없다. 발걸음을 서두른다.");
+          }}
+        ]
+      },
+      hiddenChoice:{ stat:"지", min:4, label:"명패의 배열이 뜻하는 바를 단번에 읽어낸다", sub:"지 4 이상 · 판정 없이 성공", resolve:function(){
+        addSeal(-1);
+        appendLog("narrative","명패","명패의 연도들을 눈으로 훑는 순간, 그 규칙이 보인다 — 전부 땅이 크게 흔들렸던 해다. 이 봉인은 그때마다 다시 세워져 왔다.");
       }}
     }
   ];
@@ -599,8 +690,8 @@
       card.className = "arch-card";
       card.type = "button";
       card.setAttribute("aria-pressed", selectedArchetype===a.id ? "true" : "false");
-      card.innerHTML = "<span class='nm'>"+a.name+"</span><span class='ds'>"+a.desc+"</span>";
-      card.addEventListener("click", function(){ selectedArchetype = a.id; renderArchetypes(); updateStartButton(); });
+      card.innerHTML = "<span class='nm'>"+a.name+"</span><span class='ds'>"+a.desc+"</span><span class='bonus'>"+a.bonusLabel+"</span>";
+      card.addEventListener("click", function(){ selectedArchetype = a.id; renderArchetypes(); renderStatRows(); updateStartButton(); });
       wrap.appendChild(card);
     });
   }
@@ -611,12 +702,14 @@
     STATS.forEach(function(k){
       var row = document.createElement("div");
       row.className = "stat-row";
+      var bonus = (ARCHETYPE_BONUS[selectedArchetype] && ARCHETYPE_BONUS[selectedArchetype][k]) || 0;
+      var numDisplay = stats[k] + (bonus ? " <small style='color:var(--vermillion)'>+"+bonus+"</small>" : "");
       row.innerHTML =
         '<span class="nm">'+k+'</span>' +
         '<span class="desc">'+STAT_DESC[k]+'</span>' +
         '<span class="stepper">' +
           '<button type="button" data-act="dec" data-k="'+k+'">−</button>' +
-          '<span class="n mono">'+stats[k]+'</span>' +
+          '<span class="n mono">'+numDisplay+'</span>' +
           '<button type="button" data-act="inc" data-k="'+k+'">＋</button>' +
         '</span>';
       wrap.appendChild(row);
@@ -645,11 +738,78 @@
   }
 
   // ---------- dice ----------
+  function bgBonus(key, arch){
+    var b = ARCHETYPE_BONUS[arch];
+    return (b && b[key]) || 0;
+  }
+  function effStat(key){
+    var arch = game ? game.archetype : selectedArchetype;
+    return stats[key] + bgBonus(key, arch);
+  }
   function roll(statKey){
     var d = 1 + Math.floor(Math.random()*20);
-    return { d:d, total:d+stats[statKey] };
+    var mod = effStat(statKey);
+    return { d:d, mod:mod, total:d+mod };
   }
+  function rollAndLog(statKey, dc, opts){
+    opts = opts || {};
+    var r = roll(statKey);
+    var extra = opts.extra || 0;
+    var total = r.total + extra;
+    var ok = total >= dc;
+    var extraTxt = extra ? " +"+extra+" ("+opts.extraLabel+")" : "";
+    appendLog("roll", null, statKey+" 판정 — d20("+r.d+") + "+r.mod+extraTxt+" = "+total+" / DC "+dc+" → "+(ok?"성공":"실패"));
+    return { r:r, total:total, ok:ok };
+  }
+  function doRoll(statKey, dc, opts){ return rollAndLog(statKey, dc, opts).ok; }
   function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  // ---------- success % (for TRPG-unfamiliar players) ----------
+  function statChance(statKey, dc, extra){
+    extra = extra || 0;
+    var mod = effStat(statKey) + extra;
+    var threshold = dc - mod;
+    var p;
+    if(threshold <= 1) p = 1;
+    else if(threshold > 20) p = 0;
+    else p = (21 - threshold) / 20;
+    return Math.round(p*100);
+  }
+  function annotateSub(sub, extra){
+    if(!sub) return sub;
+    return sub.replace(/(술|지|담) 판정 DC (\d+)/, function(m, stat, dcStr){
+      var dc = parseInt(dcStr,10);
+      var pct = statChance(stat, dc, extra);
+      return stat+" 판정 DC "+dc+" <span class='chance'>(성공 확률 "+pct+"%)</span>";
+    });
+  }
+
+  // ---------- choice emoji ----------
+  function subEmoji(label, sub){
+    label = label || ""; sub = sub || "";
+    if(label.indexOf("몸속 그것")!==-1) return "🩸";
+    if(label.indexOf("마지막 부적")!==-1) return "🔥";
+    if(label.indexOf("의식을 시도")!==-1) return "📖";
+    if(label.indexOf("할머니")!==-1) return "🙏";
+    if(label.indexOf("무전")!==-1) return "📡";
+    if(label.indexOf("다독인다")!==-1) return "🤝";
+    if(label.indexOf("물러나 결전")!==-1) return "🚪";
+    if(label.indexOf("봉인을 다시 세운다")!==-1) return "🔯";
+    if(label.indexOf("파괴")!==-1) return "💥";
+    if(label.indexOf("육군")!==-1) return "🎖️";
+    if(label.indexOf("포기")!==-1) return "🏳️";
+    if(label.indexOf("앞세워")!==-1) return "💔";
+    if(sub.indexOf("판정 DC")!==-1) return "🎲";
+    if(sub.indexOf("판정 없이 성공")!==-1) return "✨";
+    if(sub.indexOf("정보만")!==-1) return "🔍";
+    if(sub.indexOf("위험한 선택")!==-1) return "⚠️";
+    if(sub==="안전") return "🛡️";
+    return "🕯️";
+  }
+  function btnHtml(label, sub, extra){
+    var emo = subEmoji(label, sub);
+    return "<span class='emo'>"+emo+"</span>"+label + (sub ? "<span class='sub'>"+annotateSub(sub, extra)+"</span>" : "");
+  }
 
   // ---------- log ----------
   function appendLog(type, headText, bodyText){
@@ -745,9 +905,9 @@
   }
 
   function renderHud(){
-    var loc = game.location <= 4 ? LOCATIONS[game.location] : {name:"지하 기단"};
+    var loc = game.location <= 5 ? LOCATIONS[game.location] : {name:"지하 기단"};
     $("hud-loc-name").textContent = loc.name;
-    $("loc-kicker").textContent = game.location <= 4 ? LOCATIONS[game.location].kicker : "SCENE 5 · 최종장";
+    $("loc-kicker").textContent = game.location <= 5 ? LOCATIONS[game.location].kicker : "SCENE 6 · 최종장";
     $("loc-title").textContent = loc.name;
 
     var sealFill = $("seal-fill");
@@ -786,10 +946,11 @@
   function maybeOmen(){
     if(game.seal < 3) return;
     if(Math.random() > 0.42) return;
-    appendLog("omen","기척", pick(OMEN_LINES));
+    var lines = (game.seal >= 6 && Math.random() < 0.5) ? TREMOR_LINES : OMEN_LINES;
+    appendLog("omen","기척", pick(lines));
     var dc = 10 + game.seal;
     var r = roll("담");
-    appendLog("roll", null, "담 판정 — d20("+r.d+") + "+stats.담+" = "+r.total+" / DC "+dc);
+    appendLog("roll", null, "담 판정 — d20("+r.d+") + "+r.mod+" = "+r.total+" / DC "+dc);
     if(r.total >= dc){ appendLog("system", null, "숨을 고르며, 다시 정신을 붙든다."); }
     else{ appendLog("system", null, "다리에 힘이 풀린다. 균열이 조금 더 넓어진다."); addSeal(1); }
   }
@@ -809,10 +970,9 @@
 
   function doMendBond(){
     game.bondMended = true;
-    var dc = 13, r = roll("담");
-    if(game.archetype==="miko") r.total += 3;
-    appendLog("roll", null, "담 판정 — d20("+r.d+") + "+stats.담+(game.archetype==="miko"?" (+3 무녀)":"")+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
-    if(r.total >= dc){ game.bond = "trust"; appendLog("bond","유키에","진심 어린 말 몇 마디에, 그녀의 눈빛이 다시 풀린다."); }
+    var dc = 13;
+    var opts = game.archetype==="miko" ? {extra:3, extraLabel:"무녀"} : null;
+    if(rollAndLog("담", dc, opts).ok){ game.bond = "trust"; appendLog("bond","유키에","진심 어린 말 몇 마디에, 그녀의 눈빛이 다시 풀린다."); }
     else{ appendLog("bond","유키에","애써봤지만, 그녀는 여전히 시선을 피한다."); }
     renderHud();
     renderActions();
@@ -822,7 +982,8 @@
   function startGame(){
     game = {
       location:1, seal:0, corruption:0, bond:"trust", archetype:selectedArchetype,
-      investigated:{}, scholarNoteShown:{}, bondMended:false, sensedThisLocation:false, digSuccesses:0, ended:false
+      investigated:{}, scholarNoteShown:{}, bondMended:false, sensedThisLocation:false, digSuccesses:0, ended:false,
+      archetypeActionUsed:false
     };
     if(game.archetype==="swordsman") game.corruption = 2;
     if(game.archetype==="kenpei") game.corruption += 1;
@@ -852,7 +1013,7 @@
       var dc = 14, r = roll("지");
       var sensed = r.total >= dc;
       game.sensedThisLocation = sensed;
-      appendLog("roll", null, "지 판정 — d20("+r.d+") + "+stats.지+" = "+r.total+" / DC "+dc);
+      appendLog("roll", null, "지 판정 — d20("+r.d+") + "+r.mod+" = "+r.total+" / DC "+dc);
       if(sensed){ appendLog("hint","예감", pick(loc.hints)); }
       else{ appendLog("system", null, "특별한 낌새는 느껴지지 않는다."); }
     }
@@ -871,16 +1032,17 @@
     if(loc.riskyChoice && game.corruption >= 6 && game.bond !== "severed"){
       choices.push({choice:loc.riskyChoice, cls:"risky"});
     }
-    if(loc.hiddenChoice && stats[loc.hiddenChoice.stat] >= loc.hiddenChoice.min){
+    if(loc.hiddenChoice && effStat(loc.hiddenChoice.stat) >= loc.hiddenChoice.min){
       choices.push({choice:loc.hiddenChoice, cls:"secret"});
     }
     choices.forEach(function(entry){
       var choice = entry.choice;
       var btn = document.createElement("button");
       btn.className = "act-btn " + entry.cls;
-      btn.innerHTML = choice.label + (choice.sub ? "<span class='sub'>"+choice.sub+"</span>" : "");
+      btn.innerHTML = btnHtml(choice.label, choice.sub);
       btn.addEventListener("click", function(){
         choice.resolve();
+        renderHud();
         if(game.ended) return;
         maybeIntrude();
         if(game.ended) return;
@@ -900,28 +1062,48 @@
       var done = !!seen[item.id];
       var btn = document.createElement("button");
       btn.className = "act-btn" + (done ? " done" : "");
-      btn.innerHTML = (done ? "다시 보기 · "+item.label : item.label) + "<span class='sub'>안전 · 정보만 얻는다</span>";
+      var label = done ? "다시 보기 · "+item.label : item.label;
+      btn.innerHTML = btnHtml(label, "안전 · 정보만 얻는다");
       btn.addEventListener("click", function(){ doInvestigate(item.id); });
       wrap.appendChild(btn);
     });
 
+    var digExtra = game.archetype === "swordsman" ? 2 : 0;
     var digBtn = document.createElement("button");
     digBtn.className = "act-btn dig";
-    digBtn.innerHTML = "파고든다<span class='sub'>술 판정 DC "+loc.dc+" · 다음 장으로 · 침식 위험</span>";
+    digBtn.innerHTML = btnHtml("파고든다", "술 판정 DC "+loc.dc+" · 다음 장으로 · 침식 위험", digExtra);
     digBtn.addEventListener("click", function(){ doDig(); });
     wrap.appendChild(digBtn);
 
+    // 신원별 전용 히든 행동 (1회, 판정 없이 확정 발동)
+    var act = ARCHETYPE_ACTIONS[game.archetype];
+    if(act && !game.archetypeActionUsed){
+      var actBtn = document.createElement("button");
+      actBtn.className = "act-btn secret";
+      actBtn.innerHTML = btnHtml(act.label, act.sub);
+      actBtn.addEventListener("click", function(){
+        game.archetypeActionUsed = true;
+        appendLog("narrative", null, act.body);
+        act.effect();
+        renderHud();
+        if(game.ended) return;
+        renderActions();
+      });
+      wrap.appendChild(actBtn);
+    }
+
     if(game.bond === "doubt" && !game.bondMended){
+      var mendExtra = game.archetype === "miko" ? 3 : 0;
       var mendBtn = document.createElement("button");
       mendBtn.className = "act-btn mend";
-      mendBtn.innerHTML = "유키에를 다독인다<span class='sub'>담 판정 DC 13 · 인연 회복 시도 (1회)</span>";
+      mendBtn.innerHTML = btnHtml("유키에를 다독인다", "담 판정 DC 13 · 인연 회복 시도 (1회)", mendExtra);
       mendBtn.addEventListener("click", function(){ doMendBond(); });
       wrap.appendChild(mendBtn);
     }
 
     var retreatBtn = document.createElement("button");
     retreatBtn.className = "act-btn retreat";
-    retreatBtn.innerHTML = "물러나 결전으로 향한다<span class='sub'>지금까지의 단서를 갖고 지하로</span>";
+    retreatBtn.innerHTML = btnHtml("물러나 결전으로 향한다", "지금까지의 단서를 갖고 지하로");
     retreatBtn.addEventListener("click", function(){ goToClimax(); });
     wrap.appendChild(retreatBtn);
   }
@@ -943,10 +1125,8 @@
 
   function doDig(){
     var loc = LOCATIONS[game.location];
-    var r = roll("술");
-    if(game.archetype === "swordsman") r.total += 2;
-    var ok = r.total >= loc.dc;
-    appendLog("roll", null, "술 판정 — d20("+r.d+") + "+stats.술+(game.archetype==="swordsman"?" +2 (마인)":"")+" = "+r.total+" / DC "+loc.dc+" → "+(ok?"성공":"실패"));
+    var opts = game.archetype === "swordsman" ? {extra:2, extraLabel:"마인"} : null;
+    var ok = rollAndLog("술", loc.dc, opts).ok;
 
     if(ok){
       appendLog("narrative","파고들다", pick(loc.digOk));
@@ -976,13 +1156,13 @@
     maybeIntrude();
     if(game.ended) return;
 
-    if(game.location < 4){ game.location += 1; enterLocation(); }
+    if(game.location < 5){ game.location += 1; enterLocation(); }
     else{ goToClimax(); }
   }
 
   function goToClimax(){
     if(game.ended) return;
-    game.location = 5;
+    game.location = 6;
     enterClimax();
   }
 
@@ -998,7 +1178,8 @@
 
     $("climax-seal-wrap").hidden = false;
 
-    appendLog("narrative", null, "돌계단을 내려가자, 봉인의 중심이 눈앞에 있다. 균열 사이로 무언가 숨 쉬듯 진동한다. 이제, 선택해야 한다.");
+    appendLog("narrative", null, "돌계단을 내려가자, 봉인의 중심이 눈앞에 있다. 균열 사이로 카게가미가 숨 쉬듯 진동한다. 이제, 선택해야 한다.");
+    appendLog("system", null, "봉인을 고쳐 카게가미를 다시 가둘 것인가(재건) — 카게가미의 파편 자체를 없애버릴 것인가(소멸) — 이 일을 아예 군에 넘길 것인가(수거) — 아니면 모든 걸 덮고 물러날 것인가(은폐). 무엇을 고르든, 값을 치르는 자는 있다.");
     presentClimaxChoices();
   }
 
@@ -1013,33 +1194,31 @@
 
     var rebuildBtn = document.createElement("button");
     rebuildBtn.className = "act-btn encounter";
-    rebuildBtn.innerHTML = "봉인을 다시 세운다<span class='sub'>술 판정 DC "+sealDC+"</span>";
+    rebuildBtn.innerHTML = btnHtml("봉인을 다시 세운다", "술 판정 DC "+sealDC+" · 재건 — 카게가미를 이 자리에 다시 가둔다");
     rebuildBtn.addEventListener("click", function(){ attemptRebuild(sealDC); });
     wrap.appendChild(rebuildBtn);
 
     var destroyBtn = document.createElement("button");
     destroyBtn.className = "act-btn encounter";
-    destroyBtn.innerHTML = "소신을 파괴한다<span class='sub'>담 판정 DC "+voidDC+"</span>";
+    destroyBtn.innerHTML = btnHtml("카게가미를 파괴한다", "담 판정 DC "+voidDC+" · 소멸 — 파편 자체를 완전히 없앤다 (대가 있음)");
     destroyBtn.addEventListener("click", function(){ attemptDestroy(voidDC); });
     wrap.appendChild(destroyBtn);
 
     var armyBtn = document.createElement("button");
     armyBtn.className = "act-btn risky";
-    armyBtn.innerHTML = "제국 육군에 협조를 요청한다<span class='sub'>판정 없이 확실한 선택</span>";
+    armyBtn.innerHTML = btnHtml("제국 육군에 협조를 요청한다", "판정 없이 확실한 선택 · 수거 — 파편을 군에 넘기고 손을 뗀다");
     armyBtn.addEventListener("click", function(){ endGame("seized"); });
     wrap.appendChild(armyBtn);
 
     var giveUpBtn = document.createElement("button");
     giveUpBtn.className = "act-btn retreat";
-    giveUpBtn.innerHTML = "포기하고 물러난다<span class='sub'>판정 없이 즉시 종료</span>";
+    giveUpBtn.innerHTML = btnHtml("포기하고 물러난다", "판정 없이 즉시 종료 · 은폐 — 아무것도 하지 않고 모든 걸 덮는다");
     giveUpBtn.addEventListener("click", function(){ endGame("buried"); });
     wrap.appendChild(giveUpBtn);
   }
 
   function attemptRebuild(dc){
-    var r = roll("술");
-    appendLog("roll", null, "술 판정 — d20("+r.d+") + "+stats.술+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
-    if(r.total >= dc){ endGame("sealed"); return; }
+    if(doRoll("술", dc)){ endGame("sealed"); return; }
     appendLog("narrative", null, "진언이 도중에 끊긴다. 균열이 한층 더 벌어진다.");
     addSeal(2);
     if(game.ended) return;
@@ -1049,9 +1228,7 @@
   }
 
   function attemptDestroy(dc){
-    var r = roll("담");
-    appendLog("roll", null, "담 판정 — d20("+r.d+") + "+stats.담+" = "+r.total+" / DC "+dc+" → "+(r.total>=dc?"성공":"실패"));
-    if(r.total >= dc){ endGame("destroyed"); return; }
+    if(doRoll("담", dc)){ endGame("destroyed"); return; }
     appendLog("narrative", null, "의지가 흔들리는 순간, 그것의 기운이 정신을 파고든다.");
     addCorruption(2);
     if(game.ended) return;
@@ -1066,13 +1243,13 @@
     var titles = { sealed:"봉인 재건 — 다시, 잠들다", destroyed:"소멸 — 그 자리에 없는 사람", seized:"수거 — 누구를 위한 봉인이었나", buried:"은폐 — 아무 일도 없었다", swallowed:"폭주 — 그해 9월" };
 
     var bodies = {
-      sealed:"부적이 마지막 진언과 함께 타오르며, 균열이 서서히 아문다. 아마미야가 사람들은 그날 밤의 기억을 대부분 잃은 채 깨어난다. 저택은 '원인 모를 붕괴 위험'을 이유로 폐쇄되고, 신작로는 우회로로 변경된다. 사건은 조용히 묻힌다. 그리고 며칠 후, 전혀 다른 지역에서 올라온 실종 신고서 한 장이 책상 위에 툭 놓인다. 잠든 것은, 하나뿐이 아니었다.",
+      sealed:"부적이 마지막 진언과 함께 타오르며, 균열이 서서히 아문다. 아마미야가 사람들은 그날 밤의 기억을 대부분 잃은 채 깨어난다. 저택은 '원인 모를 붕괴 위험'을 이유로 폐쇄되고, 신작로는 우회로로 변경된다. 사건은 조용히 묻힌다. 그리고 며칠 후, 전혀 다른 지역에서 올라온 실종 신고서 한 장이 책상 위에 툭 놓인다. 봉인은, 이곳 하나가 아니었다 — 론도는 어딘가에서 이미 다음 소절로 넘어가고 있다.",
       destroyed: game.bond==="trust"
-        ? "소신은 완전히 사라진다. 가장 확실한 승리였다. 하지만 유키에는 당신과 함께 그 자리에 남았다 — 의식과 함께, 처음부터 없었던 사람처럼. 남은 이들의 기억 속에서도 그녀는 서서히 흐려진다. 세계는 구했다. 다만 그 사실을 기억하는 사람이, 하나둘 줄어들 뿐이다."
-        : "소신은 완전히 사라진다. 대가는 당신 스스로가 치렀다 — 술식의 마지막 한 조각까지, 자신의 일부를 함께 태워 넣었다. 살아남은 이들은 당신이 예전과 조금 달라졌다고 말한다. 무엇이 달라졌는지는, 아무도 정확히 설명하지 못한다.",
-      seized:"제국 육군 특별과의 인원들이 의식 도중 들이닥쳐 파편을 확보해간다. 당신들은 자신이 처음부터 이용당했음을 깨닫지만, 이미 늦었다. 사건은 '산사태 사고'로 짧게 보도되고, 며칠 후 신문 한구석에 '육군성, 신형 연구소 설립'이라는 기사가 조용히 실린다." + (game.archetype==="kenpei" ? " 당신의 옛 상관이 그 명단 맨 위에 있다." : ""),
-      buried:"어느 쪽도 완전히 끝맺지 못한 채, 당신들은 손을 뗀다. 신문에는 '아마미야가 일가족 동반 자살'이라 짧게 실리고, 세상은 신경 쓰지 않는다. 신작로는 예정대로 완공되고, 전등이 하나둘 켜진다. 진실을 아는 자들만 남아, 서로 다른 곳을 바라보며 흩어진다.",
-      swallowed:"부적도, 진언도, 이제는 소용이 없다. 저택 전체가 무언가 다른 것의 일부가 되어가는 감각 속에서, 이야기는 시간을 건너뛴다. 1923년 9월, 도쿄. 그날 벌어진 재난이 정말 땅 밑의 흔들림뿐이었는지, 이 사건을 아는 이들은 다시는 확신하지 못했다."
+        ? "카게가미는 완전히 사라진다. 가장 확실한 승리였다. 하지만 유키에는 당신과 함께 그 자리에 남았다 — 의식과 함께, 처음부터 없었던 사람처럼. 남은 이들의 기억 속에서도 그녀는 서서히 흐려진다. 세계는 구했다. 다만 그 사실을 기억하는 사람이, 하나둘 줄어들 뿐이다. 적어도 이 회랑의 론도만은, 여기서 끝났다."
+        : "카게가미는 완전히 사라진다. 대가는 당신 스스로가 치렀다 — 술식의 마지막 한 조각까지, 자신의 일부를 함께 태워 넣었다. 살아남은 이들은 당신이 예전과 조금 달라졌다고 말한다. 무엇이 달라졌는지는, 아무도 정확히 설명하지 못한다. 다만 그날 이후로, 당신은 유난히 잦은 잔진동에도 더는 놀라지 않게 되었다.",
+      seized:"제국 육군 특별과의 인원들이 의식 도중 들이닥쳐 파편을 확보해간다. 당신들은 자신이 처음부터 이용당했음을 깨닫지만, 이미 늦었다. 사건은 '산사태 사고'로 짧게 보도되고, 며칠 후 신문 한구석에 '육군성, 신형 연구소 설립'이라는 기사가 조용히 실린다." + (game.archetype==="kenpei" ? " 당신의 옛 상관이 그 명단 맨 위에 있다." : "") + " 서류에는 '카게가미 계획'이라는 암호명과 함께, 전국 각지에 흩어진 다른 봉인들의 좌표가 나란히 적혀 있다.",
+      buried:"어느 쪽도 완전히 끝맺지 못한 채, 당신들은 손을 뗀다. 신문에는 '아마미야가 일가족 동반 자살'이라 짧게 실리고, 세상은 신경 쓰지 않는다. 신작로는 예정대로 완공되고, 전등이 하나둘 켜진다. 진실을 아는 자들만 남아, 서로 다른 곳을 바라보며 흩어진다. 균열은 그 아래서, 여전히 조용히 넓어지고 있다.",
+      swallowed:"부적도, 진언도, 이제는 소용이 없다. 저택 전체가 카게가미의 일부가 되어가는 감각 속에서, 이야기는 시간을 건너뛴다. 1923년 9월, 도쿄. 회랑의 명패들이 말없이 가리키고 있던 그 해, 그 계절이 마침내 온다. 그날 벌어진 재난이 정말 땅 밑의 흔들림뿐이었는지, 이 사건을 아는 이들은 다시는 확신하지 못했다. 론도는, 마지막 소절에 이르렀다."
     };
 
     $("game-screen").hidden = true;
