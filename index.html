@@ -232,6 +232,32 @@
     padding:10px 0; margin:18px 0;
   }
   .best-record b{color:var(--vermillion);}
+  .record-summary{margin-bottom:8px;}
+  .ending-checklist{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px;}
+  .ending-checklist li{display:flex; align-items:baseline; gap:8px; font-size:12px;}
+  .ending-checklist .mark{flex:none; width:16px; text-align:center;}
+  .ending-checklist li.done .nm{color:var(--vermillion); font-weight:600;}
+  .ending-checklist li.todo .nm{color:var(--ink-soft);}
+  .ending-checklist .hint{color:var(--ink-soft); font-size:11px; font-style:italic;}
+
+  .truth-overlay{
+    position:fixed; inset:0; z-index:60;
+    background:rgba(5,5,10,0.86);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+  }
+  .truth-overlay[hidden]{display:none;}
+  .truth-card{
+    background:var(--washi); color:var(--ink);
+    border:1px solid var(--washi-edge); border-radius:2px;
+    max-width:560px; width:100%; max-height:88vh; overflow-y:auto;
+    padding:26px 24px 24px;
+    box-shadow:0 30px 70px -20px rgba(0,0,0,.85), 0 0 100px -35px rgba(207,166,63,.32);
+  }
+  .truth-card .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--vermillion);}
+  .truth-card h2{font-family:'Nanum Myeongjo',serif; font-weight:800; font-size:26px; margin:8px 0 16px;}
+  .truth-card p{line-height:1.9; font-size:15px; margin:0 0 14px;}
+  .truth-card .btn-primary{width:100%; margin-top:6px;}
 
   .glossary{
     background:#f4efe1; border:1px solid var(--washi-shadow); border-radius:2px;
@@ -345,7 +371,8 @@
       </dl>
     </details>
 
-    <div class="best-record" id="best-record">최고 기록 — 아직 없음</div>
+    <div class="best-record" id="best-record">확인한 결말 — 아직 없음</div>
+    <button class="btn-ghost" id="truth-open" hidden style="width:100%; margin:-8px 0 18px;">진상 — 론도의 전모 보기</button>
 
     <div class="block">
       <div class="block-title">신원 <span class="pool">하나 선택</span></div>
@@ -403,6 +430,15 @@
     <p class="mono" id="ending-record-note" style="font-size:12.5px; color:var(--ink-soft);"></p>
     <button class="btn-primary" id="retry-btn">다시 저택으로</button>
   </section>
+</div>
+
+<div class="truth-overlay" id="truth-overlay" hidden>
+  <div class="truth-card">
+    <div class="eyebrow">EPILOGUE</div>
+    <h2>진상 — 론도의 전모</h2>
+    <div id="truth-body"></div>
+    <button class="btn-primary" id="truth-close">닫는다</button>
+  </div>
 </div>
 
 <script>
@@ -696,6 +732,14 @@
 
   var ENDINGS_KEY = "kagegami_endings";
   var ENDING_ORDER = ["sealed","destroyed","seized","buried","swallowed"];
+  var ENDING_LABELS = { sealed:"봉인 재건", destroyed:"소멸", seized:"수거", buried:"은폐", swallowed:"폭주" };
+  var ENDING_HINTS = {
+    sealed:"최종장에서 '봉인을 다시 세운다' 판정에 성공하면",
+    destroyed:"최종장에서 '카게가미를 파괴한다' 판정에 성공하면",
+    seized:"최종장에서 '제국 육군에 협조를 요청한다'를 고르면 (판정 없이 확정)",
+    buried:"최종장에서 '포기하고 물러난다'를 고르면 (판정 없이 확정)",
+    swallowed:"침식 게이지가 10에 닿으면 (일부러 위험한 선택을 반복해보면)"
+  };
 
   function loadAchievedEndings(){
     try{
@@ -767,9 +811,22 @@
 
   function renderBestRecord(){
     var achieved = loadAchievedEndings();
-    $("best-record").textContent = achieved.length
-      ? ("확인한 결말 — "+achieved.length+" / "+ENDING_ORDER.length)
-      : "확인한 결말 — 아직 없음";
+    var wrap = $("best-record");
+    var html = '<div class="record-summary">확인한 결말 — '+achieved.length+' / '+ENDING_ORDER.length+'</div>';
+    html += '<ul class="ending-checklist">';
+    ENDING_ORDER.forEach(function(key){
+      var done = achieved.indexOf(key) !== -1;
+      html += '<li class="'+(done?'done':'todo')+'">' +
+        '<span class="mark">'+(done?'✓':'🔒')+'</span>' +
+        '<span class="nm">'+ENDING_LABELS[key]+'</span>' +
+        (done ? '' : '<span class="hint">'+ENDING_HINTS[key]+'</span>') +
+        '</li>';
+    });
+    html += '</ul>';
+    wrap.innerHTML = html;
+
+    var truthBtn = $("truth-open");
+    if(truthBtn) truthBtn.hidden = achieved.length < ENDING_ORDER.length;
   }
 
   // ---------- dice ----------
@@ -1305,7 +1362,7 @@
         achieved.push(key);
         localStorage.setItem(ENDINGS_KEY, JSON.stringify(achieved));
         note = achieved.length >= ENDING_ORDER.length
-          ? "다섯 결말을 모두 확인했습니다."
+          ? "다섯 결말을 모두 확인했습니다. 시작 화면에서 '진상 — 론도의 전모'를 열람할 수 있습니다."
           : "새로운 결말을 확인했습니다. ("+achieved.length+" / "+ENDING_ORDER.length+")";
       }
     }catch(e){}
@@ -1313,6 +1370,16 @@
   }
 
   // ---------- wire up ----------
+  // ---------- true ending epilogue (unlocked after all 5 endings) ----------
+  function truthEpilogueHtml(){
+    return '<p>다섯 개의 결말을 모두 지나며, 당신은 각기 다른 선택 속에서 카게가미와 마주했다. 하지만 어떤 선택을 했든, 당신이 보지 못한 진실이 하나 있다.</p>' +
+      '<p>카게가미는 원래 하나가 아니었다. 별의 저편에서 흘러든 무언가가 오래전 이 땅에 떨어지며 산산이 흩어졌고, 그 파편들은 전국 각지의 오래된 가문과 사당에 나뉘어 봉인되었다. 아마미야가는 그중 하나를 맡았을 뿐이다. 회랑의 벽에 새겨진 다른 이름들 — 그것은 모두 같은 임무를 짊어진 다른 가문들의 흔적이었다.</p>' +
+      '<p>그리고 그 파편들은 서로 공명한다. 하나가 흔들리면, 다른 것들도 함께 흔들린다. 몇 대에 걸쳐 이 되풀이는 ‘론도’라 불려왔다 — 한 소절이 끝나면 처음으로 돌아가 다시 시작되는, 끝나지 않는 곡.</p>' +
+      '<p>유키에는, 사실 이 저택에 우연히 손님으로 온 것이 아니었다. 그녀의 몸 어딘가에는 이미 오래전부터 옅은 균열이 자리하고 있었다 — 카미가카리, 카게가미의 파편이 사람 안에 깃드는 증상. 그녀가 유일한 목격자로 남았던 것도, 어쩌면 우연이 아니었을지 모른다. 다음 봉인을, 혹은 다음 파편을 받을 그릇으로.</p>' +
+      '<p>1923년 9월 1일. 아마미야가의 봉인이 그날 밤 어떻게 끝났든 — 재건되었든, 파괴되었든, 은폐되었든, 군에 넘겨졌든, 혹은 폭주했든 — 그날, 전국 각지에 흩어져 있던 다른 파편들의 봉인이 동시에 흔들렸다. 사람들은 그것을 그저 땅이 흔들린 재해라 불렀다. 도쿄와 요코하마를 집어삼킨 그 불과 흔들림 속에서, 얼마나 많은 ‘회랑’이 함께 무너졌는지는 아무도 세지 않았다.</p>' +
+      '<p>론도는 끝나지 않는다. 한 소절이 끝나면, 다른 어딘가에서 다시 처음으로 돌아가 울린다. 당신이 그날 밤 무엇을 선택했든, 그것은 이 긴 곡의 아주 짧은 한 소절이었을 뿐이다.</p>';
+  }
+
   document.addEventListener("DOMContentLoaded", function(){
     renderArchetypes();
     renderStatRows();
@@ -1320,6 +1387,16 @@
     renderWardSeal("intro-seal-wrap", 0);
     $("start-btn").addEventListener("click", startGame);
     $("retry-btn").addEventListener("click", function(){ location.reload(); });
+
+    $("truth-open").addEventListener("click", function(){
+      $("truth-body").innerHTML = truthEpilogueHtml();
+      $("truth-overlay").hidden = false;
+    });
+    $("truth-close").addEventListener("click", function(){ $("truth-overlay").hidden = true; });
+    $("truth-overlay").addEventListener("click", function(e){ if(e.target === $("truth-overlay")) $("truth-overlay").hidden = true; });
+    document.addEventListener("keydown", function(e){
+      if(e.key === "Escape" && !$("truth-overlay").hidden) $("truth-overlay").hidden = true;
+    });
   });
 })();
 </script>
