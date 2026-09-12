@@ -1,0 +1,8 @@
+# Secrets / environment variables
+.env
+.env.*
+!.env.example
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
